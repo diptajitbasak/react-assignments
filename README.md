@@ -26,12 +26,12 @@ https://api-dev.closewise.com/docs
 
 1. Signing Type Radio button functionality (2 points)
 2. Product Type (10 points)
-   a. Need to fetch data from api (https://api-dev.closewise.com/docs/#api-Agent_Website-agentWebsiteStandardFeesDetails)
-   use standardFees array to create product type UI.
-   b. We will take only those product which have `productValue > 0` and
-   create tabs with `productCategory`.
-   c. User can select multiple product type.
-   d. Keep in mind, We need to calculate total product cost for Step 4.
+   - Need to fetch data from api (https://api-dev.closewise.com/docs/#api-Agent_Website-agentWebsiteStandardFeesDetails)
+     use standardFees array to create product type UI.
+   - We will take only those product which have `productValue > 0` and
+     create tabs with `productCategory`.
+   - User can select multiple product type.
+   - Keep in mind, We need to calculate total product cost for Step 4.
 3. Witness Number (2 points)
    a. User only type number. We can accept 0 as number
 4. Total Booking cost calculation
@@ -43,7 +43,7 @@ https://api-dev.closewise.com/docs
 
 1. User have to search Appointment location using google search and
    selcet only valid address. (8 points)
-   a. Required if `signingType === "Mobile"`
+   - Required if `signingType === "Mobile"`
 2. Select date => Can't select past date. (2 points)
 3. Time Zone => This will disable if `signingType === "Mobile"`
    Not required if `signingType === "RON"` (2 points)
@@ -69,11 +69,11 @@ https://api-dev.closewise.com/docs
 1. Otp Timer for 60 seconds. (5 points)
 2. Text change according to user flow. (5 points)
    Like: `Email Verified`, `Otp Send` etc
-   a. Text and button change accordingly (Please check `BookingStep4` component for noets).
+   - Text and button change accordingly (Please check `BookingStep4` component).
 
 ## Over all Points (10 points)
 
-1. On successfully create Bookig. (5 points)
+1. On successfully create Booking. (5 points)
 2. Manage All Steps with proper UI. (5 points)
 
 ## TOTAL: 100 points
