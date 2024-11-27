@@ -1,70 +1,82 @@
-# Getting Started with Create React App
+# Booking Panel Assignment
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Overview
 
-## Available Scripts
+In this assignment, you will create a booking system using REACT. The booking panel has four steps. The objective is to create
+a booking by completing all four steps.
 
-In the project directory, you can run:
+## Reference
 
-### `npm start`
+https://sabyasachi.closewise-notary.com/booking?tab=1
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## API DOCS LINK:
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+https://api-dev.closewise.com/docs
 
-### `npm test`
+## Step One (Basic Details) (20 points)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+1. Radio button functionality (5 points)
+2. You need to create a multi level forms with validations. (10 points)
+3. User can't go to steps two without all required data.
+4. In the form you will get a dropdown of Languages.
+   If user select other Language then user will get a input box to fill up.
+5. You to hold data if user cameback to step one again. (5 points)
 
-### `npm run build`
+## Step two (Signing & Product Type) (20 points)
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+1. Signing Type Radio button functionality (2 points)
+2. Product Type (10 points)
+   a. Need to fetch data from api (https://api-dev.closewise.com/docs/#api-Agent_Website-agentWebsiteStandardFeesDetails)
+   use standardFees array to create product type UI.
+   b. We will take only those product which have `productValue > 0` and
+   create tabs with `productCategory`.
+   c. User can select multiple product type.
+   d. Keep in mind, We need to calculate total product cost for Step 4.
+3. Witness Number (2 points)
+   a. User only type number. We can accept 0 as number
+4. Total Booking cost calculation
+   `(product1 + product2 + productN) * Witness Number`
+5. You to hold data if user cameback to step two again. (6 points)
+6. User can't go to steps two without all required data.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Step Three (Appointment Details) (20 points)
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+1. User have to search Appointment location using google search and
+   selcet only valid address. (8 points)
+   a. Required if `signingType === "Mobile"`
+2. Select date => Can't select past date. (2 points)
+3. Time Zone => This will disable if `signingType === "Mobile"`
+   Not required if `signingType === "RON"` (2 points)
+4. Time should not be the past time. (2 points)
+5. You to hold data if user cameback to step two again. (6 points)
+6. User can't go to steps two without all required data.
 
-### `npm run eject`
+## Step Four (Booking and Payment) (20 points)
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### Booking (7 Points)
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+1. Email => Uesr need to verify email. (5 points)
+2. Name and Phone number is Required. (2 points)
+3. Add basic validation.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Payment (13 points)
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+1. You have to calculate Total Fee. (5 points)
+2. Integrate Stripe. (8 points)
 
-## Learn More
+### Bonous Points (10 points)
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+1. Otp Timer for 60 seconds. (5 points)
+2. Text change according to user flow. (5 points)
+   Like: `Email Verified`, `Otp Send` etc
+   a. Text and button change accordingly (Please check `BookingStep4` component for noets).
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Over all Points (10 points)
 
-### Code Splitting
+1. On successfully create Bookig. (5 points)
+2. Manage All Steps with proper UI. (5 points)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## TOTAL: 100 points
 
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+You Can use this AGENT ID for API CALL
+AGENT_ID: `63997eef2475d90ca5205bd2`
