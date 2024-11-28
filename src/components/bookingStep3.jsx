@@ -20,7 +20,15 @@ import { timezoneList } from "../helper-methods";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import SvgIcons from "./SvgIcons";
 
-const BookingStep3 = () => {
+const BookingStep3 = ({ onNext }) => {
+  const handlePreviousAndNext = (buttonName) => {
+    if (buttonName === "next") {
+      onNext("4", "4");
+    } else {
+      onNext("2", "2");
+    }
+  };
+
   return (
     <>
       <Card className="stepCard">
@@ -113,12 +121,16 @@ const BookingStep3 = () => {
         </CardBody>
       </Card>
       <div className="tabAction">
-        <Button color="primary" outline>
+        <Button color="primary" outline onClick={() => handlePreviousAndNext("previous")}>
           <SvgIcons type={"logArrowLeft"} />
           Previous
         </Button>
         <div>
-          <Button color="primary" className="ms-auto">
+          <Button
+            color="primary"
+            className="ms-auto"
+            onClick={() => handlePreviousAndNext("next")}
+          >
             <i className="fa fa-spinner fa-spin mr-2" />
             Next
             <SvgIcons type={"logArrowRight"} />

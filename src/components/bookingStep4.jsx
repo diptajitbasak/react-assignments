@@ -17,7 +17,15 @@ import {
 } from "reactstrap";
 import SvgIcons from "./SvgIcons";
 
-const BookingStep4 = () => {
+const BookingStep4 = ({ onNext }) => {
+  const handlePreviousAndNext = (buttonName) => {
+    if (buttonName === "previous") {
+      onNext("3", "3");
+    } else {
+      onNext("4", "5");
+    }
+  };
+
   return (
     <>
       <Card className="stepCard">
@@ -152,12 +160,12 @@ const BookingStep4 = () => {
       </Card>
 
       <div className="tabAction">
-        <Button color="primary" outline>
+        <Button color="primary" outline onClick={() => handlePreviousAndNext("previous")}>
           <SvgIcons type={"logArrowLeft"} />
           Previous
         </Button>
         <div>
-          <Button color="primary" className="ms-auto">
+          <Button color="primary" className="ms-auto" onClick={() => handlePreviousAndNext("book")}>
             <i className="fa fa-spinner fa-spin mr-2" />
             Book
           </Button>

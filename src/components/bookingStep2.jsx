@@ -13,8 +13,41 @@ import {
   TabPane,
 } from "reactstrap";
 import SvgIcons from "./SvgIcons";
+import { useEffect, useState } from "react";
+import { getStandardFees } from "../http/http-calls";
 
-const BookingStep2 = () => {
+const BookingStep2 = ({ onNext }) => {
+  const [signingType, setSigningType] = useState("Mobile");
+  console.log("signingType>>", signingType);
+
+  const handleRadioChange = (event) => {
+    setSigningType(event.target.value);
+  };
+
+  const _getStandardFees = async () => {
+    try {
+     
+        const agentID = "63997eef2475d90ca5205bd2"
+        const response = await getStandardFees(agentID)
+        console.log("response>>>", response);
+        
+    } catch {
+
+    }
+  }
+
+  useEffect(() => {
+    _getStandardFees()
+  }, [])
+
+  const handlePreviousAndNext = (buttonName) => {
+    if (buttonName === "next") {
+      onNext("3", "3");
+    } else {
+      onNext("1", "1");
+    }
+  };
+
   return (
     <>
       <Card className="stepCard">
@@ -24,13 +57,27 @@ const BookingStep2 = () => {
             <h5>Signing Type</h5>
             <FormGroup check inline>
               <Label check>
-                <Input type="radio" name="radioOption" value="Mobile" />{" "}
+                <Input
+                  id="Mobile"
+                  checked={signingType === "Mobile"}
+                  onChange={handleRadioChange}
+                  type="radio"
+                  name="signingType"
+                  value="Mobile"
+                />{" "}
                 <span> Mobile</span> (We come to you!)
               </Label>
             </FormGroup>
             <FormGroup check inline>
               <Label check>
-                <Input type="radio" name="radioOption" value="RON" />{" "}
+                <Input
+                  id="RON"
+                  checked={signingType === "RON"}
+                  onChange={handleRadioChange}
+                  type="radio"
+                  name="signingType"
+                  value="RON"
+                />{" "}
                 <span>Remote Online</span> (Virtual signing * available in
                 certain states) <i className="fa fa-info"></i>
               </Label>
@@ -109,12 +156,12 @@ const BookingStep2 = () => {
         </CardBody>
       </Card>
       <div className="tabAction">
-        <Button color="primary" outline>
+        <Button color="primary" outline onClick={() => handlePreviousAndNext("previous")}>
           <SvgIcons type={"logArrowLeft"} />
           Previous
         </Button>
         <div>
-          <Button color="primary" className="ms-auto">
+          <Button color="primary" className="ms-auto" onClick={() => handlePreviousAndNext("next")}>
             <i className="fa fa-spinner fa-spin mr-2" />
             Next
             <SvgIcons type={"logArrowRight"} />
