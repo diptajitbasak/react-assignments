@@ -15,9 +15,15 @@ import {
 import SvgIcons from "./SvgIcons";
 import { useEffect, useState } from "react";
 import { getStandardFees } from "../http/http-calls";
+import { useDispatch, useSelector } from "react-redux";
+import { updateBooking } from "../redux/actions";
 
 const BookingStep2 = ({ onNext }) => {
-  const [signingType, setSigningType] = useState("Mobile");
+  const [formFields, setFormFields] = useState({
+    signingType: "Mobile",
+  });
+  const [errors, setErrors] = useState("");
+  const [checkboxSelections, setCheckboxSelections] = useState({});
   const [standardFeeDetails, setStandardFeeDetails] = useState();
   const [activeTab, setActiveTab] = useState("1");
   // Only calculate unique categories once standardFeeDetails is available
@@ -31,10 +37,67 @@ const BookingStep2 = ({ onNext }) => {
       ]
     : [];
 
-  // console.log("uniqueCategories>>>", uniqueCategories);
+  const storedBookingData = useSelector((state) => state.bookingDataReducer);
+  // console.log("storedBookingData>>>", storedBookingData);
+  console.log("checkboxSelections>>>", checkboxSelections);
 
-  const handleRadioChange = (event) => {
-    setSigningType(event.target.value);
+  useEffect(() => {
+    if (storedBookingData && storedBookingData.step2) {
+      // Assuming storedBookingData has step2 with data
+      const updatedFormFields = {
+        witnessCount: storedBookingData.step2.witnessCount || "", // Make sure to handle default values
+        loanTypeOther: storedBookingData.step2.loanTypeOther || "",
+        loanCategories: storedBookingData.step2.loanCategories || [],
+        loanType: storedBookingData.step2.loanType || "",
+        signingType: storedBookingData.step2.signingType || "Mobile", // Default value if undefined
+        checkboxSelections: storedBookingData.step2.checkboxSelections || {}, // Default to an empty object if undefined
+      };
+      setFormFields(updatedFormFields);
+      setCheckboxSelections(updatedFormFields.checkboxSelections); // Ensure selections are set
+    }
+  }, [storedBookingData]); // Ensure it runs when storedBookingData is available
+
+  const dispatch = useDispatch();
+
+  const handleUpdateBooking = (formFields) => {
+    let updatedBookingData = { ...storedBookingData };
+
+    // Calculate productValue dynamically based on selected product categories
+    let totalProductValue = 0;
+    standardFeeDetails?.agent?.standardFees?.forEach((category) => {
+      if (
+        checkboxSelections[category.productCategory] &&
+        checkboxSelections[category.productCategory].includes(
+          category.productType
+        )
+      ) {
+        totalProductValue += category.productValue;
+      }
+    });
+
+    // Update the step2 with the form fields and calculated product value
+    updatedBookingData.step2 = {
+      witnessCount: formFields.witnessCount,
+      loanTypeOther: formFields.loanTypeOther,
+      loanCategories: [formFields.loanCategories], // array of strings of product Categories
+      loanType: [formFields.loanType], // array of strings of product type
+      signingType: formFields.signingType,
+      checkboxSelections: checkboxSelections, // Store selections in redux
+      productValue: totalProductValue * formFields.witnessCount, // Calculate total product value
+    };
+
+    dispatch(updateBooking(updatedBookingData));
+  };
+
+  console.log("formFields>>>", formFields);
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormFields((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+    // handleUpdateBooking(formFields);
   };
 
   const _getStandardFees = async () => {
@@ -53,12 +116,41 @@ const BookingStep2 = ({ onNext }) => {
     _getStandardFees();
   }, []);
 
+  useEffect(() => {
+    if (storedBookingData && storedBookingData.step2) {
+      // Assuming storedBookingData has checkboxSelections in step2
+      setCheckboxSelections(storedBookingData.step2.checkboxSelections || {});
+    }
+  }, [storedBookingData]); // This will make sure checkboxSelections is updated when storedBookingData is available
+
   const handlePreviousAndNext = (buttonName) => {
     if (buttonName === "next") {
       onNext("3", "3");
     } else {
       onNext("1", "1");
     }
+    handleUpdateBooking(formFields);
+  };
+
+  const handleCheckboxChange = (category, productType, isChecked) => {
+    setCheckboxSelections((prevSelections) => {
+      const newSelections = { ...prevSelections };
+
+      // Update the selection based on whether the checkbox was checked or unchecked
+      if (!newSelections[category]) {
+        newSelections[category] = [];
+      }
+
+      if (isChecked) {
+        newSelections[category].push(productType); // Add productType to the category
+      } else {
+        newSelections[category] = newSelections[category].filter(
+          (type) => type !== productType // Remove productType from the category
+        );
+      }
+
+      return newSelections;
+    });
   };
 
   const toggleTab = (tab) => {
@@ -76,8 +168,8 @@ const BookingStep2 = ({ onNext }) => {
               <Label check>
                 <Input
                   id="Mobile"
-                  checked={signingType === "Mobile"}
-                  onChange={handleRadioChange}
+                  checked={formFields.signingType === "Mobile"}
+                  onChange={handleChange}
                   type="radio"
                   name="signingType"
                   value="Mobile"
@@ -89,8 +181,8 @@ const BookingStep2 = ({ onNext }) => {
               <Label check>
                 <Input
                   id="RON"
-                  checked={signingType === "RON"}
-                  onChange={handleRadioChange}
+                  checked={formFields.signingType === "RON"}
+                  onChange={handleChange}
                   type="radio"
                   name="signingType"
                   value="RON"
@@ -140,7 +232,8 @@ const BookingStep2 = ({ onNext }) => {
                     })}
                   </div>
                 </TabPane> */}
-                <TabPane tabId={activeTab}>
+
+                {/* <TabPane tabId={activeTab}>
                   <div className="productList">
                     {standardFeeDetails?.agent?.standardFees
                       .filter((category, index, self) => {
@@ -159,12 +252,62 @@ const BookingStep2 = ({ onNext }) => {
                             <li>
                               <div className="formLabel">
                                 <Input type="checkbox" name="signing" />
-                                {category.productType} (${category.productValue}
-                                )
+                                {category.productType
+                                  .replace(/([A-Z])/g, " $1") // Add a space before each uppercase letter
+                                  .trim()}{" "}
+                                (${category.productValue})
                               </div>
                             </li>
                           ) : (
                             ""
+                          )}
+                        </ul>
+                      ))}
+                  </div>
+                </TabPane> */}
+
+                <TabPane tabId={activeTab}>
+                  <div className="productList">
+                    {standardFeeDetails?.agent?.standardFees
+                      .filter((category, index, self) => {
+                        return (
+                          category.productCategory ===
+                            uniqueCategories[activeTab - 1] &&
+                          self.findIndex(
+                            (item) => item.productType === category.productType
+                          ) === index
+                        );
+                      })
+                      .map((category) => (
+                        <ul key={category._id}>
+                          {category.productValue > 0 && (
+                            <li>
+                              <div className="formLabel">
+                                <Input
+                                  type="checkbox"
+                                  name="signing"
+                                  checked={
+                                    checkboxSelections[
+                                      uniqueCategories[activeTab - 1]
+                                    ] &&
+                                    checkboxSelections[
+                                      uniqueCategories[activeTab - 1]
+                                    ].includes(category.productType)
+                                  }
+                                  onChange={(e) =>
+                                    handleCheckboxChange(
+                                      uniqueCategories[activeTab - 1],
+                                      category.productType,
+                                      e.target.checked
+                                    )
+                                  }
+                                />
+                                {category.productType
+                                  .replace(/([A-Z])/g, " $1") // Add a space before each uppercase letter
+                                  .trim()}{" "}
+                                (${category.productValue})
+                              </div>
+                            </li>
                           )}
                         </ul>
                       ))}
@@ -176,7 +319,13 @@ const BookingStep2 = ({ onNext }) => {
 
           <div className="formGroup mt-4">
             <Label>Witness Number ($0 per Witness)</Label>
-            <Input placeholder="Enter Witness Number" />
+            <Input
+              name="witnessCount"
+              placeholder="Enter Witness Number"
+              type="number"
+              value={formFields.witnessCount}
+              onChange={handleChange}
+            />
           </div>
         </CardBody>
       </Card>

@@ -68,21 +68,22 @@ const BookingStep1 = ({ onNext }) => {
       // Prefill isBookingMainSigner from Redux store
       const isMainSigner = storedBookingData.isBookingMainSigner;
       setBookingFor(isMainSigner ? "mainSigner" : "someoneElse");
-  
+
       // Assuming storedBookingData has borrower info
-      const updatedFormFields = storedBookingData.borrower.map((borrower) => ({
-        signer: borrower.name.first + " " + borrower.name.last,
-        email: borrower.email,
-        phone: borrower.phone.home,
-        language: borrower.language,
-        languageTypeOther: borrower.languageTypeOther,
-        id: Math.random(), // Generate a unique ID for each form field
-      }));
-  
+      const updatedFormFields = storedBookingData?.borrower?.map(
+        (borrower) => ({
+          signer: borrower.name.first + " " + borrower.name.last,
+          email: borrower.email,
+          phone: borrower.phone.home,
+          language: borrower.language,
+          languageTypeOther: borrower.languageTypeOther,
+          id: Math.random(), // Generate a unique ID for each form field
+        })
+      );
+
       setFormFields(updatedFormFields);
     }
   }, []); // Include storedBookingData as a dependency
-  
 
   const dispatch = useDispatch();
 
@@ -95,10 +96,14 @@ const BookingStep1 = ({ onNext }) => {
     // Loop through formFields to extract firstName and lastName
     const updatedBorrowers = formFields.map((field) => {
       // Split the signer name into first name and last name
-      let nameParts = field.signer.split(" ");
+      let nameParts = field?.signer?.split(" ");
+      let firstName = "",
+        lastName = ""; // Declare the variables outside the if block
 
-      const firstName = nameParts[0]; // The first name is the first part
-      const lastName = nameParts.slice(1).join(" "); // The rest is considered the last name (handles cases like middle names)
+      if (nameParts) {
+        firstName = nameParts[0]; // Assign the first name (first part of name)
+        lastName = nameParts.slice(1).join(" "); // Assign the rest as last name (handles middle names)
+      }
 
       return {
         email: field.email,
@@ -283,7 +288,7 @@ const BookingStep1 = ({ onNext }) => {
             </FormGroup>
           </div>
 
-          {formFields.map((fields, index) => (
+          {formFields?.map((fields, index) => (
             <div key={fields.id} className="cardInerInfo">
               {" "}
               {/* Use unique `fields.id` */}
