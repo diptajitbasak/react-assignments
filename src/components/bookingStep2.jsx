@@ -31,7 +31,7 @@ const BookingStep2 = ({ onNext }) => {
       ]
     : [];
 
-  console.log("uniqueCategories>>>", uniqueCategories);
+  // console.log("uniqueCategories>>>", uniqueCategories);
 
   const handleRadioChange = (event) => {
     setSigningType(event.target.value);
@@ -155,25 +155,28 @@ const BookingStep2 = ({ onNext }) => {
                       })
                       .map((category, index) => (
                         <ul key={category._id}>
-                          <li>
-                            <div className="formLabel">
-                              <Input type="checkbox" name="signing" />
-                              {category.productType} (${category.productValue})
-                            </div>
-                          </li>
+                          {category.productValue > 0 ? (
+                            <li>
+                              <div className="formLabel">
+                                <Input type="checkbox" name="signing" />
+                                {category.productType} (${category.productValue}
+                                )
+                              </div>
+                            </li>
+                          ) : (
+                            ""
+                          )}
                         </ul>
                       ))}
                   </div>
                 </TabPane>
-
-               
               </TabContent>
             </div>
           </div>
 
           <div className="formGroup mt-4">
             <Label>Witness Number ($0 per Witness)</Label>
-            <Input placeholder="Enter" />
+            <Input placeholder="Enter Witness Number" />
           </div>
         </CardBody>
       </Card>

@@ -16,7 +16,7 @@ const BookingDataSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(updateBooking, (state, action) => {
-        console.log("action >", action);
+        console.log("action >>>>", action);
         state.step1 = action.payload?.step1;
         state.step2 = action.payload?.step2;
         state.step3 = action.payload?.step3;

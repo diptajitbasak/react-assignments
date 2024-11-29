@@ -16,7 +16,7 @@ const stripePromise = loadStripe(STRIPE_API_KEY);
 function App() {
   const [activeTab, setActiveTab] = useState("1");
   const [tabCount, setTabCount] = useState("1");
-  console.log("tabCount>>>", tabCount);
+  // console.log("tabCount>>>", tabCount);
 
   // Function to change the active tab
   const toggleTab = (tab, count) => {

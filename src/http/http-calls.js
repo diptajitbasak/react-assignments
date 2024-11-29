@@ -315,6 +315,7 @@ export const getLoggedInUserDetail = () => {
   });
 };
 
+// step4
 export const getDetailsWithEmail = (payload) => {
   return new Promise((resolve, reject) => {
     makePostRequest(
@@ -332,6 +333,7 @@ export const getDetailsWithEmail = (payload) => {
   });
 };
 
+// step4
 export const sendOtpEmailForBooking = (payload) => {
   return new Promise((resolve, reject) => {
     makePostRequest(
@@ -349,6 +351,7 @@ export const sendOtpEmailForBooking = (payload) => {
   });
 };
 
+// step4
 export const verificationForBooking = (payload) => {
   return new Promise((resolve, reject) => {
     makePostRequest(
@@ -366,6 +369,7 @@ export const verificationForBooking = (payload) => {
   });
 };
 
+// step4 final booking
 export const createBooking = (payload) => {
   return new Promise((resolve, reject) => {
     makePostRequest(
