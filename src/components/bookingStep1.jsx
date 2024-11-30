@@ -59,25 +59,23 @@ const BookingStep1 = ({ onNext }) => {
   // console.log("bookingFor>>>", bookingFor);
 
   const storedBookingData = useSelector(
-    (state) => state.bookingDataReducer.step1
+    (state) => state.bookingDataReducer
   );
   console.log("storedBookingData>>>", storedBookingData);
 
   useEffect(() => {
     if (storedBookingData) {
-      // Prefill isBookingMainSigner from Redux store
-      const isMainSigner = storedBookingData.isBookingMainSigner;
+      const isMainSigner = storedBookingData.step1.isBookingMainSigner;
       setBookingFor(isMainSigner ? "mainSigner" : "someoneElse");
 
-      // Assuming storedBookingData has borrower info
-      const updatedFormFields = storedBookingData?.borrower?.map(
+      const updatedFormFields = storedBookingData?.step1?.borrower?.map(
         (borrower) => ({
           signer: borrower.name.first + " " + borrower.name.last,
           email: borrower.email,
           phone: borrower.phone.home,
           language: borrower.language,
           languageTypeOther: borrower.languageTypeOther,
-          id: Math.random(), // Generate a unique ID for each form field
+          id: Math.random(),
         })
       );
 
@@ -92,19 +90,19 @@ const BookingStep1 = ({ onNext }) => {
     if (bookingFor === "someoneElse") {
       isBookingMainSigner = false;
     }
-
+  
     // Loop through formFields to extract firstName and lastName
     const updatedBorrowers = formFields.map((field) => {
       // Split the signer name into first name and last name
       let nameParts = field?.signer?.split(" ");
       let firstName = "",
-        lastName = ""; // Declare the variables outside the if block
-
+        lastName = "";
+  
       if (nameParts) {
-        firstName = nameParts[0]; // Assign the first name (first part of name)
-        lastName = nameParts.slice(1).join(" "); // Assign the rest as last name (handles middle names)
+        firstName = nameParts[0]; 
+        lastName = nameParts.slice(1).join(" "); 
       }
-
+  
       return {
         email: field.email,
         phone: {
@@ -118,21 +116,22 @@ const BookingStep1 = ({ onNext }) => {
         languageTypeOther: field.languageTypeOther,
       };
     });
-
+  
     // Now, construct the booking data with updated borrowers
     const bookingData = {
       step1: {
         isBookingMainSigner: isBookingMainSigner,
         borrower: updatedBorrowers,
       },
-      step2: null,
-      step3: null,
-      step4: null,
-      agentIds: [],
+      step2: { ...storedBookingData.step2 },  // Keep step2 unchanged
+      step3: { ...storedBookingData.step3 },  // Keep step3 unchanged
+      step4: { ...storedBookingData.step4 },  // Keep step4 unchanged
+      // agentIds: [], // Assuming this is handled elsewhere in your code
     };
-
+  
     dispatch(updateBooking(bookingData));
   };
+  
 
   const handleRadioChange = (event, signerValue) => {
     setBookingFor(event.target.value);
