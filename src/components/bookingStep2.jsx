@@ -23,7 +23,7 @@ const BookingStep2 = ({ onNext }) => {
     signingType: "Mobile",
   });
   const [errors, setErrors] = useState("");
-  console.log("errors>>", errors);
+  // console.log("errors>>", errors);
 
   const [checkboxSelections, setCheckboxSelections] = useState({});
   const [standardFeeDetails, setStandardFeeDetails] = useState();
@@ -41,7 +41,7 @@ const BookingStep2 = ({ onNext }) => {
 
   const storedBookingData = useSelector((state) => state.bookingDataReducer);
   // console.log("storedBookingData>>>", storedBookingData);
-  console.log("checkboxSelections>>>", checkboxSelections);
+  // console.log("checkboxSelections>>>", checkboxSelections);
 
   useEffect(() => {
     if (storedBookingData && storedBookingData.step2) {
@@ -91,7 +91,7 @@ const BookingStep2 = ({ onNext }) => {
     dispatch(updateBooking(updatedBookingData));
   };
 
-  console.log("formFields>>>", formFields);
+  // console.log("formFields>>>", formFields);
 
   const handleChange = (event) => {
     const { name, value } = event.target;

@@ -166,15 +166,48 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import SvgIcons from "./SvgIcons";
 import { useState } from "react";
 import { googlePlaceSearch } from "../helper-methods/google-service";
+import { useDispatch, useSelector } from "react-redux";
+import { updateBooking } from "../redux/actions";
 
 const BookingStep3 = ({ onNext }) => {
   const [formFields, setFormFields] = useState({});
+  const [errors, setErrors] = useState("");
+
   console.log("formFields>>>", formFields);
+  console.log("errors>>>", errors);
+
+  const storedBookingData = useSelector((state) => state.bookingDataReducer);
+  const dispatch = useDispatch();
+  const handleUpdateBooking = (formFields) => {
+    let updatedBookingData = { ...storedBookingData };
+    // Update the step2 with the form fields and calculated product value
+    updatedBookingData.step3 = {
+      appointmentDate: formFields?.date,
+      timeZone: formFields?.timeZone,
+      closingAddress: {
+        line1: formFields?.line1,
+        line2: formFields?.line2,
+        city: formFields?.city,
+        state: formFields?.state,
+        zip: formFields?.zip,
+        county: formFields?.county,
+      },
+    };
+
+    dispatch(updateBooking(updatedBookingData));
+  };
+  // console.log("storedBookingData>>>", storedBookingData);
 
   const handlePreviousAndNext = (buttonName) => {
-    if (buttonName === "next") {
-      onNext("4", "4");
-    } else {
+    handleUpdateBooking(formFields);
+
+    const isFormValid = validateForm(formFields);
+    if (isFormValid) {
+      if (buttonName === "next") {
+        onNext("4", "4");
+      }
+    }
+    if (buttonName === "previous") {
       onNext("2", "2");
     }
   };
@@ -191,16 +224,46 @@ const BookingStep3 = ({ onNext }) => {
       }
     } catch (err) {
       console.log("err", err);
-      
     }
   };
 
+  const validateForm = (updatedFormFields) => {
+    let isvalid = true;
+    if (storedBookingData?.step2?.signingType === "RON") {
+      if (!updatedFormFields?.timeZone) {
+        setErrors("*Please Select Time Zone"); // Show error if any array inside checkboxSelections is empty
+        isvalid = false;
+        return isvalid;
+      } else {
+        setErrors("");
+        isvalid = true;
+        return isvalid;
+      }
+    }
+    return isvalid;
+  };
+
   const handleChange = (event) => {
-    const { name, value } = event.target;
-    setFormFields((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    let value = "";
+    let name = "date"; // Default name for handling the date
+
+    // Check if the event is a moment object (from ReactDatetime)
+    if (event && event._isValid) {
+      name = event.target ? event.target.name : "date"; // Set default name if not from input
+      value = event.format("DD/MM/YYYY HH:mm"); // Format the date to 'DD/MM/YYYY HH:mm'
+    } else if (event && event.target) {
+      name = event.target.name;
+      value = event.target.value; // Regular input value
+    }
+
+    // Update the formFields state with the formatted value
+    const updatedFormFields = { ...formFields };
+    updatedFormFields[name] = value;
+    setFormFields(updatedFormFields);
+
+    validateForm(updatedFormFields);
+    handleUpdateBooking(updatedFormFields);
+
   };
 
   // Function to check if the selected date is not in the past
@@ -260,6 +323,7 @@ const BookingStep3 = ({ onNext }) => {
                     name="date"
                     isValidDate={isValidDate} // Prevent past dates, allow today
                     dateFormat={true}
+                    onChange={handleChange}
                     closeOnSelect={true}
                     timeFormat={false}
                   />
@@ -272,12 +336,18 @@ const BookingStep3 = ({ onNext }) => {
             <Col md={6}>
               <FormGroup>
                 <Label>Time Zone</Label>
-                <Input type="select" name="timeZone" onChange={handleChange}>
+                <Input
+                  type="select"
+                  name="timeZone"
+                  onChange={handleChange}
+                  disabled={storedBookingData?.step2?.signingType === "Mobile"}
+                >
                   <option value="">Select</option>
                   {timezoneList().map((item, index) => (
                     <option key={index}>{item}</option>
                   ))}
                 </Input>
+                {errors && <p style={{ color: "red" }}>{errors}</p>}
               </FormGroup>
             </Col>
             <Col md={6}>
