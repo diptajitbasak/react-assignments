@@ -23,6 +23,8 @@ const BookingStep2 = ({ onNext }) => {
     signingType: "Mobile",
   });
   const [errors, setErrors] = useState("");
+  console.log("errors>>", errors);
+
   const [checkboxSelections, setCheckboxSelections] = useState({});
   const [standardFeeDetails, setStandardFeeDetails] = useState();
   const [activeTab, setActiveTab] = useState("1");
@@ -77,13 +79,13 @@ const BookingStep2 = ({ onNext }) => {
 
     // Update the step2 with the form fields and calculated product value
     updatedBookingData.step2 = {
-      witnessCount: formFields.witnessCount,
-      loanTypeOther: formFields.loanTypeOther,
-      loanCategories: [formFields.loanCategories], // array of strings of product Categories
-      loanType: [formFields.loanType], // array of strings of product type
-      signingType: formFields.signingType,
+      witnessCount: formFields?.witnessCount || 0,
+      loanTypeOther: formFields?.loanTypeOther,
+      loanCategories: [formFields?.loanCategories], // array of strings of product Categories
+      loanType: [formFields?.loanType], // array of strings of product type
+      signingType: formFields?.signingType,
       checkboxSelections: checkboxSelections, // Store selections in redux
-      productValue: totalProductValue * formFields.witnessCount, // Calculate total product value
+      productValue: totalProductValue * formFields?.witnessCount, // Calculate total product value
     };
 
     dispatch(updateBooking(updatedBookingData));
@@ -123,24 +125,72 @@ const BookingStep2 = ({ onNext }) => {
     }
   }, [storedBookingData]); // This will make sure checkboxSelections is updated when storedBookingData is available
 
-  const handlePreviousAndNext = (buttonName) => {
-    if (buttonName === "next") {
-      onNext("3", "3");
+  const validateForm = (checkboxSelections) => {
+    // Check if checkboxSelections has any non-empty arrays
+    const isSelectionsEmpty = Object.values(checkboxSelections).every(
+      (arr) => arr.length === 0
+    );
+    let isvalid = true;
+    if (isSelectionsEmpty) {
+      setErrors("*Required"); // Show error if any array inside checkboxSelections is empty
+      isvalid = false;
+      return isvalid;
     } else {
+      setErrors("");
+      isvalid = true;
+      return isvalid;
+    }
+  };
+
+  const handlePreviousAndNext = (buttonName) => {
+    handleUpdateBooking(formFields);
+
+    const isFormValid = validateForm(checkboxSelections);
+    if (isFormValid) {
+      if (buttonName === "next") {
+        onNext("3", "3");
+      }
+    }
+    if (buttonName === "previous") {
       onNext("1", "1");
     }
-    handleUpdateBooking(formFields);
   };
+
+  // const handleCheckboxChange = (category, productType, isChecked) => {
+  //   setCheckboxSelections((prevSelections) => {
+  //     const newSelections = { ...prevSelections };
+
+  //     // Update the selection based on whether the checkbox was checked or unchecked
+  //     if (!newSelections[category]) {
+  //       newSelections[category] = [];
+  //     }
+
+  //     if (isChecked) {
+  //       newSelections[category].push(productType); // Add productType to the category
+  //     } else {
+  //       newSelections[category] = newSelections[category].filter(
+  //         (type) => type !== productType // Remove productType from the category
+  //       );
+  //     }
+
+  //     return newSelections;
+  //   });
+  // };
 
   const handleCheckboxChange = (category, productType, isChecked) => {
     setCheckboxSelections((prevSelections) => {
+      // Deep copy the prevSelections to avoid mutation
       const newSelections = { ...prevSelections };
 
-      // Update the selection based on whether the checkbox was checked or unchecked
+      // Ensure we create a new array if category doesn't exist yet
       if (!newSelections[category]) {
         newSelections[category] = [];
+      } else {
+        // Create a copy of the existing array to avoid mutating the original array directly
+        newSelections[category] = [...newSelections[category]];
       }
 
+      // Update the selection based on whether the checkbox was checked or unchecked
       if (isChecked) {
         newSelections[category].push(productType); // Add productType to the category
       } else {
@@ -148,6 +198,7 @@ const BookingStep2 = ({ onNext }) => {
           (type) => type !== productType // Remove productType from the category
         );
       }
+      validateForm(newSelections);
 
       return newSelections;
     });
@@ -315,6 +366,7 @@ const BookingStep2 = ({ onNext }) => {
                 </TabPane>
               </TabContent>
             </div>
+            {errors && <p style={{ color: "red" }}>{errors}</p>}
           </div>
 
           <div className="formGroup mt-4">
