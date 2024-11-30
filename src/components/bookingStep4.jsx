@@ -173,8 +173,9 @@ const BookingStep4 = ({ onNext }) => {
           console.log("response >>", response);
           if (response) {
             setButtonName("Verified");
-          }
+          } 
         } catch (error) {
+          setButtonName("Not Verified")
           console(error);
         }
       }
@@ -184,20 +185,34 @@ const BookingStep4 = ({ onNext }) => {
   const handleSubmit = async () => {
     try {
       await markAllDirty();
-      const isValid = await validateForm(formFields);
+      const isValid = validateForm(formFields);
       console.log("isValid >>", isValid);
       if (isValid) {
-        // const payload = {
-        //   // create payload here using redux store
-        // };
-        // const response = await createBooking(payload);
-        // if (response) {
-        //   dispatch(clearBooking());
-        // }
+        const payload = {
+          // create payload here using redux store
+          agentId : "63997eef2475d90ca5205bd2",
+          clientId : "674b1a5c8a3e92307b79fde6" ,
+          borrower : storedBookingData?.step1?.borrower ,
+          signingType : storedBookingData?.step2?.signingType ,
+          loanType : storedBookingData?.step2?.loanType ,
+          loanCategories : storedBookingData?.step2?.loanCategories ,
+          loanTypeOther : storedBookingData?.step2?.loanTypeOther ,
+          witnessCount : storedBookingData?.step2?.witnessCount ,
+          appointmentDate : storedBookingData?.step3?.appointmentDate ,
+          closingAddress : storedBookingData?.step3?.closingAddress ,
+          timeZone : storedBookingData?.step3?.timeZone ,
+          isBookingMainSigner : storedBookingData?.step1?.isBookingMainSigner ,
+          agentFee : agentFee ,
+          totalAmount: totalValue ,
+        };
+        const response = await createBooking(payload);
+        if (response) {
+          dispatch(clearBooking());
+        }
         alert("sucessfull Booking");
       }
     } catch (error) {
-      console(error);
+      // console(error);
     }
   };
 
