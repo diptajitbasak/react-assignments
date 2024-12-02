@@ -164,20 +164,50 @@ import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import { timezoneList } from "../helper-methods";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import SvgIcons from "./SvgIcons";
-import { useState } from "react";
-import { googlePlaceSearch } from "../helper-methods/google-service";
+import { useEffect, useState } from "react";
+import {
+  googlePlaceDetails,
+  googlePlaceSearch,
+} from "../helper-methods/google-service";
 import { useDispatch, useSelector } from "react-redux";
 import { updateBooking } from "../redux/actions";
+import moment from "moment";
+import Toastify from "toastify-js";
 
 const BookingStep3 = ({ onNext }) => {
   const [formFields, setFormFields] = useState({});
+  const [placeSuggestions, setPlaceSuggestions] = useState([]);
+
   const [errors, setErrors] = useState("");
 
   console.log("formFields>>>", formFields);
-  console.log("errors>>>", errors);
+  // console.log("errors>>>", errors);
 
   const storedBookingData = useSelector((state) => state.bookingDataReducer);
+
+  useEffect(() => {
+    if (storedBookingData.step3) {
+      // Assuming storedBookingData has step2 with data
+      const updatedFormFields = {
+        appointmentDate: storedBookingData?.step3?.appointmentDate || "",
+        timeZone: storedBookingData?.step3?.timeZone || "",
+        time: storedBookingData?.step3?.time || "",
+        closingAddress: storedBookingData?.step3?.closingAddress || "",
+        formattedAddress: storedBookingData?.step3?.closingAddress?.state || "",
+      };
+      setFormFields(updatedFormFields);
+      // setCheckboxSelections(updatedFormFields.checkboxSelections); // Ensure selections are set
+    }
+  }, []); // Ensure it runs when storedBookingData is available
+
+  useEffect(() => {
+    // if (formFields?.closingAddress) {
+    handleUpdateBooking(formFields);
+    // }
+  }, [formFields]); // Trigger this when formFields change
+
   const dispatch = useDispatch();
+
   const handleUpdateBooking = (formFields) => {
     let updatedBookingData = { ...storedBookingData };
     // Update the step2 with the form fields and calculated product value
@@ -185,12 +215,12 @@ const BookingStep3 = ({ onNext }) => {
       appointmentDate: formFields?.date,
       timeZone: formFields?.timeZone,
       closingAddress: {
-        line1: formFields?.line1,
-        line2: formFields?.line2,
-        city: formFields?.city,
-        state: formFields?.state,
-        zip: formFields?.zip,
-        county: formFields?.county,
+        line1: formFields?.closingAddress?.line1,
+        line2: formFields?.closingAddress?.line2,
+        city: formFields?.closingAddress?.city,
+        state: formFields?.closingAddress?.state,
+        zip: formFields?.closingAddress?.zip,
+        county: formFields?.closingAddress?.county,
       },
     };
 
@@ -212,15 +242,26 @@ const BookingStep3 = ({ onNext }) => {
     }
   };
 
+  const handleChangeTime = (date) => {
+    const formattedTime = moment(date).format("HH:mm");
+    console.log("formattedTime", formattedTime);
+
+    setFormFields({
+      ...formFields,
+      time: date,
+    });
+  };
+
   const handleLocationSearch = async (event) => {
     const searchValue = event.target.value;
-    console.log("searchValue>>", searchValue);
+    // console.log("searchValue>>", searchValue);
 
     try {
       if (searchValue) {
         console.log("searchValue>>", searchValue);
         const googleSearch = await googlePlaceSearch(searchValue);
-        console.log("googleSearch>>", googleSearch);
+        // console.log("googleSearch>>", googleSearch);
+        setPlaceSuggestions(googleSearch);
       }
     } catch (err) {
       console.log("err", err);
@@ -243,30 +284,96 @@ const BookingStep3 = ({ onNext }) => {
     return isvalid;
   };
 
+  const getPlaceDetail = async (selectedPlace) => {
+    console.log("selectedPlace>>>", selectedPlace);
+
+    try {
+      if (selectedPlace?.place_id) {
+        // console.log("selectedPlace.place_id>>", selectedPlace.place_id);
+        const placeDetails = await googlePlaceDetails(selectedPlace.place_id);
+        // console.log("placeDetails>>", placeDetails);
+        const updatedFormFields = { ...formFields };
+        updatedFormFields["closingAddress"] = {
+          line1: placeDetails?.street,
+          line2: placeDetails?.address,
+          city: placeDetails?.city,
+          state: placeDetails?.state,
+          zip: placeDetails?.postal,
+          county: placeDetails?.county,
+        };
+        updatedFormFields["selectedPlace"] = selectedPlace?.description;
+        setFormFields(updatedFormFields);
+        // handleUpdateBooking(updatedFormFields)
+        setTimeout(() => {
+          setPlaceSuggestions([]); // This will close the dropdown after a brief delay
+        }, 100);
+      } else {
+        Toastify({
+          text: "Invalid Address Selected!",
+          title: "Title",
+          duration: 1500,
+          close: true,
+          gravity: "top",
+          position: "center",
+          backgroundColor: "#1D9E53", // Parrot Green color
+          stopOnFocus: true,
+          closeMethod: "fade",
+          className: "custom-toast",
+        }).showToast();
+
+        // alert("Ivalid Address Selected!");
+      }
+    } catch (err) {
+      console.log("err", err);
+    }
+  };
+
+  // const handleChange = (event) => {
+  //   let value = "";
+  //   let name = "date"; // Default name for handling the date
+
+  //   // Check if the event is a moment object (from ReactDatetime)
+  //   if (event && event._isValid) {
+  //     name = event.target ? event.target.name : "date"; // Set default name if not from input
+  //     value = event.format("DD/MM/YYYY"); // Format the date to 'DD/MM/YYYY HH:mm'
+  //   } else if (event && event.target) {
+  //     name = event.target.name;
+  //     value = event.target.value; // Regular input value
+  //   }
+
+  //   // Update the formFields state with the formatted value
+  //   const updatedFormFields = { ...formFields };
+  //   updatedFormFields[name] = value;
+  //   setFormFields(updatedFormFields);
+
+  //   validateForm(updatedFormFields);
+  //   handleUpdateBooking(updatedFormFields);
+  // };
+
+  // Function to check if the selected date is not in the past
+
   const handleChange = (event) => {
     let value = "";
-    let name = "date"; // Default name for handling the date
+    let name = event.target ? event.target.name : "appointmentDate"; // Default name for handling the date
 
-    // Check if the event is a moment object (from ReactDatetime)
+    // Handle ReactDatetime for date and time
     if (event && event._isValid) {
-      name = event.target ? event.target.name : "date"; // Set default name if not from input
-      value = event.format("DD/MM/YYYY HH:mm"); // Format the date to 'DD/MM/YYYY HH:mm'
+      name = event.target ? event.target.name : "appointmentDate";
+      value = event.format("DD/MM/YYYY"); // Format the date to 'DD/MM/YYYY'
     } else if (event && event.target) {
       name = event.target.name;
       value = event.target.value; // Regular input value
     }
 
-    // Update the formFields state with the formatted value
+    // Update the formFields state
     const updatedFormFields = { ...formFields };
     updatedFormFields[name] = value;
     setFormFields(updatedFormFields);
 
+    // Optionally validate form after updating
     validateForm(updatedFormFields);
-    handleUpdateBooking(updatedFormFields);
-
   };
 
-  // Function to check if the selected date is not in the past
   const isValidDate = (current) => {
     // Allow today's date, but prevent selecting past dates
     const today = new Date().setHours(0, 0, 0, 0); // Set to midnight to compare only dates
@@ -288,23 +395,24 @@ const BookingStep3 = ({ onNext }) => {
                   </InputGroupText>
                   <Input
                     placeholder="Search"
+                    value={formFields?.selectedPlace || ""}
                     className="w-full"
                     onChange={(e) => handleLocationSearch(e)}
                   />
                 </InputGroup>
                 <ListGroup>
-                  {" "}
-                  {/* {searchResult?.map((each, index) => {
-              return (
-                <ListGroupItem
-                  key={each.place_id}
-                  className="cursorPointer"
-                  onClick={() => getPlaceDetail(each)}
-                >
-                  {each.description}
-                </ListGroupItem>
-              );
-            })} */}
+                  {placeSuggestions.length > 0 &&
+                    placeSuggestions.map((each, index) => {
+                      return (
+                        <ListGroupItem
+                          key={each.place_id}
+                          className="cursorPointer"
+                          onClick={() => getPlaceDetail(each)}
+                        >
+                          {each.description}
+                        </ListGroupItem>
+                      );
+                    })}
                 </ListGroup>
               </FormGroup>
             </Col>
@@ -318,9 +426,9 @@ const BookingStep3 = ({ onNext }) => {
                       placeholder: "Select Date",
                       readOnly: true,
                     }}
-                    initialValue={new Date()}
-                    value={formFields.date || ""}
-                    name="date"
+                    initialValue={""}
+                    value={formFields.appointmentDate || new Date()}
+                    name="appointmentDate"
                     isValidDate={isValidDate} // Prevent past dates, allow today
                     dateFormat={true}
                     onChange={handleChange}
@@ -340,6 +448,7 @@ const BookingStep3 = ({ onNext }) => {
                   type="select"
                   name="timeZone"
                   onChange={handleChange}
+                  value={formFields?.timeZone}
                   disabled={storedBookingData?.step2?.signingType === "Mobile"}
                 >
                   <option value="">Select</option>
@@ -359,8 +468,8 @@ const BookingStep3 = ({ onNext }) => {
                     placeholder: "Select Start Time",
                     readOnly: true,
                   }}
-                  value={new Date()}
-                  onChange={(e) => {}}
+                  value={formFields?.time}
+                  onChange={handleChangeTime}
                   onClose={() => {}}
                   dateFormat={false}
                   timeFormat={true}

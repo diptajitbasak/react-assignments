@@ -41,7 +41,7 @@ const BookingStep2 = ({ onNext }) => {
 
   const storedBookingData = useSelector((state) => state.bookingDataReducer);
   // console.log("storedBookingData>>>", storedBookingData);
-  // console.log("checkboxSelections>>>", checkboxSelections);
+  console.log("checkboxSelections>>>", checkboxSelections);
 
   useEffect(() => {
     if (storedBookingData && storedBookingData.step2) {
@@ -62,6 +62,12 @@ const BookingStep2 = ({ onNext }) => {
   const dispatch = useDispatch();
 
   const handleUpdateBooking = (formFields) => {
+
+    const loanCategories = Object.keys(checkboxSelections);
+    const loanType = Object.values(checkboxSelections).flat();
+    console.log("loanCategories>>", loanCategories);
+    console.log("loanType>>", loanType);
+    
     let updatedBookingData = { ...storedBookingData };
 
     // Calculate productValue dynamically based on selected product categories
@@ -81,8 +87,8 @@ const BookingStep2 = ({ onNext }) => {
     updatedBookingData.step2 = {
       witnessCount: formFields?.witnessCount || 0,
       loanTypeOther: formFields?.loanTypeOther,
-      loanCategories: [formFields?.loanCategories], // array of strings of product Categories
-      loanType: [formFields?.loanType], // array of strings of product type
+      loanCategories: loanCategories, // array of strings of product Categories
+      loanType: loanType, // array of strings of product type
       signingType: formFields?.signingType,
       checkboxSelections: checkboxSelections, // Store selections in redux
       productValue: totalProductValue * formFields?.witnessCount, // Calculate total product value

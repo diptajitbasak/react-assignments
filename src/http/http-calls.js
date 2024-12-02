@@ -174,6 +174,7 @@ export const addDefaultCard = (payload) => {
   });
 };
 
+// step4
 export const agentClientAddAndSetDefaultCard = (payload) => {
   return new Promise((resolve, reject) => {
     makePostRequest(`${BASE_URL}/agent/client/card`, true, payload)

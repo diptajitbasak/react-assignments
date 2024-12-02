@@ -67,3 +67,4 @@ export const formatTime = (date, isTimezone = false) => {
 
   return moment(date).format("hh:mm a");
 };
+

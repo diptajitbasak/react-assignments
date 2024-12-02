@@ -11,3 +11,26 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+/* Custom toast notification styles */
+.custom-toast {
+  border-radius: 10px;  /* Round corners */
+  font-size: 16px;  /* Larger text for readability */
+  font-weight: bold;  /* Make the text bold */
+  color: #fff;  /* White text */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);  /* Shadow for depth */
+  padding: 15px 20px;  /* Add some padding around the text */
+}
+
+/* Position the toast to the top-center */
+.Toastify__toast-container {
+  top: 20px !important;  /* Distance from the top of the screen */
+  left: 50% !important;  /* Center horizontally */
+  transform: translateX(-50%);  /* Perfectly center it */
+}
+
+/* Optional: Customize the close button */
+.Toastify__close {
+  color: #fff;  /* Close button color */
+  font-size: 20px;  /* Close button size */
+  margin-left: 10px;
+}

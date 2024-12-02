@@ -42,7 +42,14 @@ export const LanguageList = [
 
 const BookingStep1 = ({ onNext }) => {
   const [bookingFor, setBookingFor] = useState("mainSigner");
-  const [formFields, setFormFields] = useState([{}]);
+  console.log("111>>>");
+  const [formFields, setFormFields] = useState([
+    {
+      signer: "",
+      email: "",
+      phone: "",
+    },
+  ]);
   const [errors, setErrors] = useState([{}]);
   const [isDirty, setIsDirty] = useState([
     {
@@ -54,18 +61,16 @@ const BookingStep1 = ({ onNext }) => {
 
   const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i;
   const phoneRegex = /^(\+91[\-\s]?)?[0]?(91)?[789]\d{9}$/;
-  // console.log("formFields>>>", formFields);
+  console.log("formFields>>>", formFields);
   // console.log("errors>>>", errors);
   // console.log("bookingFor>>>", bookingFor);
 
-  const storedBookingData = useSelector(
-    (state) => state.bookingDataReducer
-  );
+  const storedBookingData = useSelector((state) => state.bookingDataReducer);
   console.log("storedBookingData>>>", storedBookingData);
 
   useEffect(() => {
-    if (storedBookingData) {
-      const isMainSigner = storedBookingData.step1.isBookingMainSigner;
+    if (storedBookingData.step1) {
+      const isMainSigner = storedBookingData?.step1?.isBookingMainSigner;
       setBookingFor(isMainSigner ? "mainSigner" : "someoneElse");
 
       const updatedFormFields = storedBookingData?.step1?.borrower?.map(
@@ -81,7 +86,7 @@ const BookingStep1 = ({ onNext }) => {
 
       setFormFields(updatedFormFields);
     }
-  }, []); // Include storedBookingData as a dependency
+  }, []); 
 
   const dispatch = useDispatch();
 
@@ -90,19 +95,19 @@ const BookingStep1 = ({ onNext }) => {
     if (bookingFor === "someoneElse") {
       isBookingMainSigner = false;
     }
-  
+
     // Loop through formFields to extract firstName and lastName
     const updatedBorrowers = formFields.map((field) => {
       // Split the signer name into first name and last name
       let nameParts = field?.signer?.split(" ");
       let firstName = "",
         lastName = "";
-  
+
       if (nameParts) {
-        firstName = nameParts[0]; 
-        lastName = nameParts.slice(1).join(" "); 
+        firstName = nameParts[0];
+        lastName = nameParts.slice(1).join(" ");
       }
-  
+
       return {
         email: field.email,
         phone: {
@@ -116,22 +121,21 @@ const BookingStep1 = ({ onNext }) => {
         languageTypeOther: field.languageTypeOther,
       };
     });
-  
+
     // Now, construct the booking data with updated borrowers
     const bookingData = {
       step1: {
         isBookingMainSigner: isBookingMainSigner,
         borrower: updatedBorrowers,
       },
-      step2: { ...storedBookingData.step2 },  // Keep step2 unchanged
-      step3: { ...storedBookingData.step3 },  // Keep step3 unchanged
-      step4: { ...storedBookingData.step4 },  // Keep step4 unchanged
+      step2: { ...storedBookingData.step2 }, // Keep step2 unchanged
+      step3: { ...storedBookingData.step3 }, // Keep step3 unchanged
+      step4: { ...storedBookingData.step4 }, // Keep step4 unchanged
       // agentIds: [], // Assuming this is handled elsewhere in your code
     };
-  
+
     dispatch(updateBooking(bookingData));
   };
-  
 
   const handleRadioChange = (event, signerValue) => {
     setBookingFor(event.target.value);
@@ -287,120 +291,121 @@ const BookingStep1 = ({ onNext }) => {
             </FormGroup>
           </div>
 
-          {formFields?.map((fields, index) => (
-            <div key={fields.id} className="cardInerInfo">
-              {" "}
-              {/* Use unique `fields.id` */}
-              <h5>Basic Info</h5>
-              <div className="SignerInfo">
-                <div className="formGroup">
-                  <Label>Signer Name</Label>
-                  <Input
-                    name="signer"
-                    value={fields.signer || ""}
-                    placeholder="Enter your Name"
-                    onChange={(e) => handleChange(index, e)}
-                    onBlur={(e) => handleBlur(index, e)}
-                  />
-                  <div
-                    className="formGroup"
-                    style={{ color: "red", fontSize: "15px" }}
-                  >
-                    {isDirty[index]?.signer && (
-                      <span>{errors[index]?.signer}</span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="formGroup">
-                  <Label>Email ID</Label>
-                  <Input
-                    name="email"
-                    placeholder="Enter your Email ID"
-                    value={fields.email || ""}
-                    onChange={(e) => handleChange(index, e)}
-                    onBlur={(e) => handleBlur(index, e)}
-                  />
-                  <div
-                    className="formGroup"
-                    style={{ color: "red", fontSize: "15px" }}
-                  >
-                    {isDirty[index]?.email && (
-                      <span>{errors[index]?.email}</span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="formGroup ">
-                  <Label>Phone Number</Label>
-                  <InputGroup className="withCountryCode">
-                    <InputGroupText>
-                      <Input type="select">
-                        <option>+1</option>
-                      </Input>
-                    </InputGroupText>
+          {formFields !== undefined &&
+            formFields?.map((fields, index) => (
+              <div key={fields.id} className="cardInerInfo">
+                {" "}
+                {/* Use unique `fields.id` */}
+                <h5>Basic Info</h5>
+                <div className="SignerInfo">
+                  <div className="formGroup">
+                    <Label>Signer Name</Label>
                     <Input
-                      name="phone"
-                      placeholder="Enter your Phone No."
-                      value={fields.phone || ""}
+                      name="signer"
+                      value={fields.signer || ""}
+                      placeholder="Enter your Name"
                       onChange={(e) => handleChange(index, e)}
                       onBlur={(e) => handleBlur(index, e)}
                     />
-                  </InputGroup>
-                  <div
-                    className="formGroup"
-                    style={{ color: "red", fontSize: "15px" }}
-                  >
-                    {isDirty[index]?.phone && (
-                      <span>{errors[index]?.phone}</span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="formGroup">
-                  <Label>Language</Label>
-                  <Input
-                    type="select"
-                    name="language"
-                    value={fields.language || ""}
-                    onChange={(e) => handleChange(index, e)}
-                  >
-                    <option value="">Select your Language</option>
-
-                    {LanguageList.map((lang, index) => (
-                      <option key={index} value={lang.value}>
-                        {lang.label}
-                      </option>
-                    ))}
-                  </Input>
-                </div>
-
-                {formFields[index]?.language === "Other" && (
-                  <div className="formGroup">
-                    <Label>Other Language</Label>
-                    <Input
-                      type="text"
-                      name="languageTypeOther"
-                      value={fields.languageTypeOther || ""}
-                      onChange={(e) => handleChange(index, e)}
-                    ></Input>
-                  </div>
-                )}
-
-                {formFields.length > 1 && (
-                  <div className="action">
-                    <Button
-                      color="link"
-                      className="remove"
-                      onClick={() => handleDelete(fields.id)}
+                    <div
+                      className="formGroup"
+                      style={{ color: "red", fontSize: "15px" }}
                     >
-                      <FontAwesomeIcon icon={faTrashAlt} />
-                    </Button>
+                      {isDirty[index]?.signer && (
+                        <span>{errors[index]?.signer}</span>
+                      )}
+                    </div>
                   </div>
-                )}
+
+                  <div className="formGroup">
+                    <Label>Email ID</Label>
+                    <Input
+                      name="email"
+                      placeholder="Enter your Email ID"
+                      value={fields.email || ""}
+                      onChange={(e) => handleChange(index, e)}
+                      onBlur={(e) => handleBlur(index, e)}
+                    />
+                    <div
+                      className="formGroup"
+                      style={{ color: "red", fontSize: "15px" }}
+                    >
+                      {isDirty[index]?.email && (
+                        <span>{errors[index]?.email}</span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="formGroup ">
+                    <Label>Phone Number</Label>
+                    <InputGroup className="withCountryCode">
+                      <InputGroupText>
+                        <Input type="select">
+                          <option>+1</option>
+                        </Input>
+                      </InputGroupText>
+                      <Input
+                        name="phone"
+                        placeholder="Enter your Phone No."
+                        value={fields.phone || ""}
+                        onChange={(e) => handleChange(index, e)}
+                        onBlur={(e) => handleBlur(index, e)}
+                      />
+                    </InputGroup>
+                    <div
+                      className="formGroup"
+                      style={{ color: "red", fontSize: "15px" }}
+                    >
+                      {isDirty[index]?.phone && (
+                        <span>{errors[index]?.phone}</span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="formGroup">
+                    <Label>Language</Label>
+                    <Input
+                      type="select"
+                      name="language"
+                      value={fields.language || ""}
+                      onChange={(e) => handleChange(index, e)}
+                    >
+                      <option value="">Select your Language</option>
+
+                      {LanguageList.map((lang, index) => (
+                        <option key={index} value={lang.value}>
+                          {lang.label}
+                        </option>
+                      ))}
+                    </Input>
+                  </div>
+
+                  {formFields[index]?.language === "Other" && (
+                    <div className="formGroup">
+                      <Label>Other Language</Label>
+                      <Input
+                        type="text"
+                        name="languageTypeOther"
+                        value={fields.languageTypeOther || ""}
+                        onChange={(e) => handleChange(index, e)}
+                      ></Input>
+                    </div>
+                  )}
+
+                  {formFields.length > 1 && (
+                    <div className="action">
+                      <Button
+                        color="link"
+                        className="remove"
+                        onClick={() => handleDelete(fields.id)}
+                      >
+                        <FontAwesomeIcon icon={faTrashAlt} />
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
           <Button color="link" size="sm" onClick={handleAdd}>
             <FontAwesomeIcon icon={faPlus} /> Add New Person
           </Button>

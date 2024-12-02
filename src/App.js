@@ -28,9 +28,9 @@ function App() {
 
   return (
     <>
-      <script
+      {/* <script
         src={`https://maps.googleapis.com/maps/api/js?key=${GOOGLE_LOCATION_API_KEY}&libraries=places`}
-      />
+      /> */}
       <Providers>
         <Elements stripe={stripePromise}>
           <div className="bookingForm">
