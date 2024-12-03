@@ -43,6 +43,7 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
   const [tokenCode, setTokenCode] = useState("");
   const [isVerified, setIsVerified] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFullLoading, setIsFullLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -143,6 +144,18 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
         });
         setTimer(59);
         setShowTimer(true);
+      } else {
+        toast.error("Faild to sent OTP", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+
+          theme: "light",
+        });
+        setShowTimer(false);
       }
       setEmailDot(emailDotFormat(email));
     } catch (err) {
@@ -173,14 +186,23 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
   };
 
   const handleChange = (name, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    validateField(name, value);
+    if (name === "email") {
+      setEmail(value);
+      validateField(name, value);
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+      validateField(name, value);
+    }
   };
   const handleBlur = (name) => {
-    validateField(name, formData[name]);
+    if (name === "email") {
+      validateField(name, email);
+    } else {
+      validateField(name, formData[name]);
+    }
   };
 
   const validateField = (name, value) => {
@@ -220,6 +242,7 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
 
   const handleBook = async () => {
     if (validForm()) {
+      setIsFullLoading(true);
       const cardElement = elements.getElement(CardElement);
       let payload = {};
       await stripe.createToken(cardElement).then(function (result) {
@@ -245,6 +268,7 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
             totalAmount: Number(totalAmount.toFixed(2)),
           };
           console.log("payload", payload);
+
           const bookClosingApiRes = await createBooking(payload);
           if (!bookClosingApiRes.error) {
             setIsOpenModal(true);
@@ -280,6 +304,8 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
         }
       } catch (err) {
         console.log("stripe Card Response not found");
+      } finally {
+        setIsFullLoading(false);
       }
     }
   };
@@ -305,7 +331,7 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
                     placeholder="Enter"
                     name="email"
                     onBlur={() => handleBlur("email")}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => handleChange("email", e.target.value)}
                   />
                   {!isVerified ? (
                     !userDetails ? (
@@ -369,7 +395,7 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
                     <Button
                       color="link"
                       onClick={handleVerifyCodeApi}
-                      disabled={isLoading || isVerified || !showTimer}
+                      disabled={isLoading || isVerified}
                       style={{ display: isVerified ? "none" : "inline" }}
                     >
                       {isLoading ? <Spinner size="sm" /> : "Verify"}
@@ -483,6 +509,20 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
 
       {isOpenModal && (
         <Successfull isOpen={isOpenModal} toggle={() => _toggleModal()} />
+      )}
+      {isFullLoading && (
+        <Spinner
+          color="info"
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            height: "3rem",
+            width: "3rem",
+          }}
+        >
+          Loading...
+        </Spinner>
       )}
     </>
   );
