@@ -53,7 +53,7 @@ export const formatDate = (date, timeZone = null) => {
   // if (moment().isSame(date, "year")) {
   //   return moment(date).format("MMM DD");
   // } else {
-  return moment(date).format("MMM DD, YYYY");
+  return moment(date).format("DD/MM/YYYY");
   // }
 };
 
@@ -65,6 +65,6 @@ export const formatTime = (date, isTimezone = false) => {
   //   if (timeZone) date = MomentTimezone.tz(date, timeZone);
   // }
 
-  return moment(date).format("hh:mm a");
+  return moment(date).format("HH:mm");
 };
 

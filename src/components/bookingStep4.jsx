@@ -489,6 +489,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { clearBooking } from "../redux/actions";
 import Toastify from 'toastify-js';
+import { formatDate, formatTime } from "../helper-methods";
 
 const BookingStep4 = ({ onNext }) => {
 
@@ -528,7 +529,21 @@ const BookingStep4 = ({ onNext }) => {
   // console.log("storedBookingData>>>", storedBookingData);
   const processingFee = parseFloat(((storedBookingData?.step2?.productValue * 3.5) / 100).toFixed(2));
   useEffect(() => {
-    if (storedBookingData && processingFee) {
+
+    if (storedBookingData?.step3) { 
+      const formattedDate = formatDate(storedBookingData?.step3?.appointmentDate)
+     
+      console.log("formattedDate", formattedDate);
+      const formattedTime = formatTime(storedBookingData?.step3?.time)
+      console.log("formattedTime", formattedTime);
+      setFormFields((prev) => ({
+        ...prev,
+        formattedDate : formattedDate,
+        formattedTime : formattedTime
+      }))
+    }
+
+      if (storedBookingData && processingFee) {
       const totalProductValue =
       parseFloat ((storedBookingData?.step2?.productValue + processingFee).toFixed(2));
       console.log("totalProductValue>>>", totalProductValue);
@@ -546,6 +561,9 @@ const BookingStep4 = ({ onNext }) => {
     } else if (countdown === 0) {
       clearInterval(interval); // Stop the timer when it reaches 0
       setTimer(false); // Reset the timer state
+    } else if (buttonName === "Verified") {
+      // clearInterval(interval); // Stop the timer when it reaches 0
+      // setTimer(false); // Reset the timer state
     }
     return () => clearInterval(interval); // Clean up the interval when component unmounts
   }, [timer, countdown]);
@@ -637,7 +655,7 @@ const BookingStep4 = ({ onNext }) => {
           setButtonName("Send OTP");
         }
       } catch (error) {
-        console(error);
+        console.log(error);
       }
     } else if (name === "Send OTP") {
       setLoading(true);
@@ -649,7 +667,6 @@ const BookingStep4 = ({ onNext }) => {
         const response = await sendOtpEmailForBooking(payload);
         console.log("response >>", response);
         if (response) {
-          
           Toastify({
             text: "OTP has been sent successfully!",
             title: "Title",
@@ -664,7 +681,6 @@ const BookingStep4 = ({ onNext }) => {
           }).showToast();
           
 
-          // setButtonName("disable");
           setTimer(true);
           setCountdown(60); // Reset countdown to 60 seconds
         }
@@ -685,6 +701,8 @@ const BookingStep4 = ({ onNext }) => {
           console.log("response >>", response);
           if (response) {
             setButtonName("Verified");
+            setTimer(false); // Reset the timer state
+
             const updatedFormFields = {...formFields}
             updatedFormFields["name"] = response?.user?.name?.full
             updatedFormFields["phone"] = response?.user?.phone
@@ -753,8 +771,8 @@ const BookingStep4 = ({ onNext }) => {
                 loanCategories: storedBookingData?.step2?.loanCategories,
                 loanTypeOther: storedBookingData?.step2?.loanTypeOther,
                 witnessCount: storedBookingData?.step2?.witnessCount,
-                // appointmentDate: storedBookingData?.step3?.appointmentDate,
-                appointmentDate : "03/02/2025 10:32",
+                appointmentDate: formFields?.formattedDate + " " + formFields?.formattedTime,
+                // appointmentDate : "03/02/2025 10:32",
                 closingAddress: storedBookingData?.step3?.closingAddress,
                 timeZone: storedBookingData?.step3?.timeZone,
                 isBookingMainSigner:
@@ -762,9 +780,10 @@ const BookingStep4 = ({ onNext }) => {
                 agentFee: storedBookingData?.step2?.productValue,
                 totalAmount: totalValue,
               };
+              console.log("payload", payload);
+              
               const response = await createBooking(payload);
               if (response) {
-                dispatch(clearBooking());
                 Toastify({
                   text: "Sucessfull Booking!",
                   title: "Title",
@@ -777,6 +796,8 @@ const BookingStep4 = ({ onNext }) => {
                   closeMethod: "fade", 
                   className: "custom-toast",
                 }).showToast();
+                dispatch(clearBooking());
+                onNext("1","1")
 
               }
             }
@@ -843,6 +864,7 @@ const BookingStep4 = ({ onNext }) => {
                   {buttonName === "Check Email" && (
                     <InputGroupText>
                       <Button
+                      disabled={!formFields?.email}
                         color="link"
                         className="p-0"
                         onClick={(e) => handleButtons(e, "Check Email")}
@@ -863,10 +885,17 @@ const BookingStep4 = ({ onNext }) => {
                   Don&apos;t receive the OTP? <span>29s</span>
                 </span> */}
 
+                  {/* Show timer countdown when OTP is sent */}
+                  {timer ? (
+                  <span className="resetOtpCount">
+                   Don&apos;t receive the OTP? : <span style={{color:"red", fontSize:"15px"}}>{countdown}s</span>
+                  </span>
+                ) : ""}
+
                 
 
                 <span className="mt-1 fs-11 d-block text-muted">
-                  Enter your email to get 4 digit verify code!
+                  Enter your email to receive an OTP!
                 </span>
               </div>
             </Col>
@@ -883,6 +912,7 @@ const BookingStep4 = ({ onNext }) => {
                   {/* show this when email is verified */}
                   <InputGroupText>
                     <Button
+                    disabled={!formFields?.otp}
                       color="link"
                       onClick={(e) => handleButtons(e, "Verify")}
                     >
@@ -894,16 +924,11 @@ const BookingStep4 = ({ onNext }) => {
                 {/* Show this when otp is sent with email address */}
                 {timer && (
                   <span className=" mt-1 fs-11 d-block text-muted">
-                    We have sent you a 4 digit code at{" "}
+                    We have sent you an OTP at{" "}
                     {obfuscateEmail(formFields.email)}
                   </span>
                 )}
-                 {/* Show timer countdown when OTP is sent */}
-                 {timer && (
-                  <span className="resetOtpCount">
-                   Remaining Time : <span style={{color:"red"}}>{countdown}s</span>
-                  </span>
-                )}
+               
               </div>
             </Col>
             <Col lg={6} md={6}>

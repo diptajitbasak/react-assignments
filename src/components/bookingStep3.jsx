@@ -186,25 +186,25 @@ const BookingStep3 = ({ onNext }) => {
   const storedBookingData = useSelector((state) => state.bookingDataReducer);
 
   useEffect(() => {
-    if (storedBookingData.step3) {
-      // Assuming storedBookingData has step2 with data
+    if (storedBookingData?.step3) {
       const updatedFormFields = {
         appointmentDate: storedBookingData?.step3?.appointmentDate || "",
         timeZone: storedBookingData?.step3?.timeZone || "",
         time: storedBookingData?.step3?.time || "",
         closingAddress: storedBookingData?.step3?.closingAddress || "",
         formattedAddress: storedBookingData?.step3?.closingAddress?.state || "",
+        locationSearched: storedBookingData?.step3?.locationSearched || "",
       };
       setFormFields(updatedFormFields);
       // setCheckboxSelections(updatedFormFields.checkboxSelections); // Ensure selections are set
     }
-  }, []); // Ensure it runs when storedBookingData is available
+  }, []);
 
   useEffect(() => {
     // if (formFields?.closingAddress) {
     handleUpdateBooking(formFields);
     // }
-  }, [formFields]); // Trigger this when formFields change
+  }, [formFields]);
 
   const dispatch = useDispatch();
 
@@ -212,8 +212,10 @@ const BookingStep3 = ({ onNext }) => {
     let updatedBookingData = { ...storedBookingData };
     // Update the step2 with the form fields and calculated product value
     updatedBookingData.step3 = {
-      appointmentDate: formFields?.date,
+      time: formFields?.time,
+      appointmentDate: formFields?.appointmentDate,
       timeZone: formFields?.timeZone,
+      locationSearched: formFields?.locationSearched,
       closingAddress: {
         line1: formFields?.closingAddress?.line1,
         line2: formFields?.closingAddress?.line2,
@@ -243,8 +245,8 @@ const BookingStep3 = ({ onNext }) => {
   };
 
   const handleChangeTime = (date) => {
-    const formattedTime = moment(date).format("HH:mm");
-    console.log("formattedTime", formattedTime);
+    // const formattedTime = moment(date).format("HH:mm");
+    // console.log("formattedTime", formattedTime);
 
     setFormFields({
       ...formFields,
@@ -252,13 +254,17 @@ const BookingStep3 = ({ onNext }) => {
     });
   };
 
-  const handleLocationSearch = async (event) => {
+  const handleLocationSearch = async (event, name) => {
+    console.log("name>>>", name);
+
+    const updatedFormFields = { ...formFields };
+    updatedFormFields[name] = event.target.value;
+    setFormFields(updatedFormFields);
     const searchValue = event.target.value;
-    // console.log("searchValue>>", searchValue);
 
     try {
-      if (searchValue) {
-        console.log("searchValue>>", searchValue);
+      if (searchValue.length > 2) {
+        // console.log("searchValue>>", searchValue);
         const googleSearch = await googlePlaceSearch(searchValue);
         // console.log("googleSearch>>", googleSearch);
         setPlaceSuggestions(googleSearch);
@@ -284,13 +290,15 @@ const BookingStep3 = ({ onNext }) => {
     return isvalid;
   };
 
-  const getPlaceDetail = async (selectedPlace) => {
-    console.log("selectedPlace>>>", selectedPlace);
+  const getPlaceDetail = async (locationSearched) => {
+    console.log("locationSearched>>>", locationSearched);
 
     try {
-      if (selectedPlace?.place_id) {
-        // console.log("selectedPlace.place_id>>", selectedPlace.place_id);
-        const placeDetails = await googlePlaceDetails(selectedPlace.place_id);
+      if (locationSearched?.place_id) {
+        // console.log("locationSearched.place_id>>", locationSearched.place_id);
+        const placeDetails = await googlePlaceDetails(
+          locationSearched.place_id
+        );
         // console.log("placeDetails>>", placeDetails);
         const updatedFormFields = { ...formFields };
         updatedFormFields["closingAddress"] = {
@@ -301,7 +309,7 @@ const BookingStep3 = ({ onNext }) => {
           zip: placeDetails?.postal,
           county: placeDetails?.county,
         };
-        updatedFormFields["selectedPlace"] = selectedPlace?.description;
+        updatedFormFields["locationSearched"] = locationSearched?.description;
         setFormFields(updatedFormFields);
         // handleUpdateBooking(updatedFormFields)
         setTimeout(() => {
@@ -328,30 +336,6 @@ const BookingStep3 = ({ onNext }) => {
     }
   };
 
-  // const handleChange = (event) => {
-  //   let value = "";
-  //   let name = "date"; // Default name for handling the date
-
-  //   // Check if the event is a moment object (from ReactDatetime)
-  //   if (event && event._isValid) {
-  //     name = event.target ? event.target.name : "date"; // Set default name if not from input
-  //     value = event.format("DD/MM/YYYY"); // Format the date to 'DD/MM/YYYY HH:mm'
-  //   } else if (event && event.target) {
-  //     name = event.target.name;
-  //     value = event.target.value; // Regular input value
-  //   }
-
-  //   // Update the formFields state with the formatted value
-  //   const updatedFormFields = { ...formFields };
-  //   updatedFormFields[name] = value;
-  //   setFormFields(updatedFormFields);
-
-  //   validateForm(updatedFormFields);
-  //   handleUpdateBooking(updatedFormFields);
-  // };
-
-  // Function to check if the selected date is not in the past
-
   const handleChange = (event) => {
     let value = "";
     let name = event.target ? event.target.name : "appointmentDate"; // Default name for handling the date
@@ -359,7 +343,7 @@ const BookingStep3 = ({ onNext }) => {
     // Handle ReactDatetime for date and time
     if (event && event._isValid) {
       name = event.target ? event.target.name : "appointmentDate";
-      value = event.format("DD/MM/YYYY"); // Format the date to 'DD/MM/YYYY'
+      value = event; // Format the date to 'DD/MM/YYYY'
     } else if (event && event.target) {
       name = event.target.name;
       value = event.target.value; // Regular input value
@@ -380,6 +364,19 @@ const BookingStep3 = ({ onNext }) => {
     return current.isSameOrAfter(today); // Allow today and any future date
   };
 
+  const checkTime = (givenTime) => {
+    const now = moment(); 
+    if (moment(givenTime).isBefore(now)) {
+      return false;
+    } else if (moment(givenTime).isSameOrAfter(now, "minute")) {
+      return true;
+    }
+  };
+
+  // const abc = checkTime(formFields?.time);
+
+  // console.log("abc>>>", abc);
+
   return (
     <>
       <Card className="stepCard">
@@ -395,9 +392,11 @@ const BookingStep3 = ({ onNext }) => {
                   </InputGroupText>
                   <Input
                     placeholder="Search"
-                    value={formFields?.selectedPlace || ""}
+                    value={formFields?.locationSearched || ""}
                     className="w-full"
-                    onChange={(e) => handleLocationSearch(e)}
+                    onChange={(e) =>
+                      handleLocationSearch(e, "locationSearched")
+                    }
                   />
                 </InputGroup>
                 <ListGroup>
@@ -469,6 +468,7 @@ const BookingStep3 = ({ onNext }) => {
                     readOnly: true,
                   }}
                   value={formFields?.time}
+                  name="time"
                   onChange={handleChangeTime}
                   onClose={() => {}}
                   dateFormat={false}

@@ -91,13 +91,13 @@ const BookingStep2 = ({ onNext }) => {
       loanType: loanType, // array of strings of product type
       signingType: formFields?.signingType,
       checkboxSelections: checkboxSelections, // Store selections in redux
-      productValue: totalProductValue * formFields?.witnessCount, // Calculate total product value
+      productValue: totalProductValue + (formFields?.witnessCount * standardFeeDetails?.agent?.WitnessFee), // Calculate total product value
     };
 
     dispatch(updateBooking(updatedBookingData));
   };
 
-  // console.log("formFields>>>", formFields);
+  console.log("standardFeeDetails>>>", standardFeeDetails);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -113,7 +113,7 @@ const BookingStep2 = ({ onNext }) => {
       const agentID = "63997eef2475d90ca5205bd2";
       const response = await getStandardFees(agentID);
       if (response) {
-        setStandardFeeDetails(response); // Ensure response is stored as the complete object
+        setStandardFeeDetails(response); 
       }
     } catch (error) {
       console.error(error);
@@ -324,7 +324,7 @@ const BookingStep2 = ({ onNext }) => {
                 </TabPane> */}
 
                 <TabPane tabId={activeTab}>
-                  <div className="productList">
+                  <div style={{display:"flex",  flexWrap:"wrap"}} className="productList">
                     {standardFeeDetails?.agent?.standardFees
                       .filter((category, index, self) => {
                         return (
@@ -339,7 +339,7 @@ const BookingStep2 = ({ onNext }) => {
                         <ul key={category._id}>
                           {category.productValue > 0 && (
                             <li>
-                              <div className="formLabel">
+                              <div className="formLabel" style={{margin:"10px",display:"flex", }}>
                                 <Input
                                   type="checkbox"
                                   name="signing"
@@ -376,8 +376,8 @@ const BookingStep2 = ({ onNext }) => {
           </div>
 
           <div className="formGroup mt-4">
-            <Label>Witness Number ($0 per Witness)</Label>
-            <Input
+          <Label>Witness Number ({"$" + standardFeeDetails?.agent?.WitnessFee} per Witness)</Label>
+          <Input
               name="witnessCount"
               placeholder="Enter Witness Number"
               type="number"
