@@ -297,7 +297,7 @@ export const checkAvailability = (payload) => {
         resolve(res);
       })
       .catch((e) => {
-        console.log("API call error>>", e);
+        // console.log("API call error>>", e);
         reject(e);
       });
   });

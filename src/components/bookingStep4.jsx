@@ -491,10 +491,11 @@ import { clearBooking } from "../redux/actions";
 import Toastify from 'toastify-js';
 
 const BookingStep4 = ({ onNext }) => {
-  
+
   const [buttonName, setButtonName] = useState("Check Email");
   const [timer, setTimer] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [countdown, setCountdown] = useState(60); 
 
   const [formFields, setFormFields] = useState({
     email: "",
@@ -535,6 +536,20 @@ const BookingStep4 = ({ onNext }) => {
       setTotalValue(totalProductValue);
     }
   },[]);
+
+  useEffect(() => {
+    let interval;
+    if (timer && countdown > 0) {
+      interval = setInterval(() => {
+        setCountdown((prev) => prev - 1); // Decrease countdown by 1 second
+      }, 1000);
+    } else if (countdown === 0) {
+      clearInterval(interval); // Stop the timer when it reaches 0
+      setTimer(false); // Reset the timer state
+    }
+    return () => clearInterval(interval); // Clean up the interval when component unmounts
+  }, [timer, countdown]);
+
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -651,6 +666,7 @@ const BookingStep4 = ({ onNext }) => {
 
           // setButtonName("disable");
           setTimer(true);
+          setCountdown(60); // Reset countdown to 60 seconds
         }
       } catch (error) {
         // console(error);
@@ -812,7 +828,7 @@ const BookingStep4 = ({ onNext }) => {
                   {buttonName === "Send OTP" && (
                     <InputGroupText>
                       <Button
-                        disabled={loading}
+                        disabled={loading || timer}
                         color="primary"
                         onClick={(e) => handleButtons(e, "Send OTP")}
                       >
@@ -847,6 +863,8 @@ const BookingStep4 = ({ onNext }) => {
                   Don&apos;t receive the OTP? <span>29s</span>
                 </span> */}
 
+                
+
                 <span className="mt-1 fs-11 d-block text-muted">
                   Enter your email to get 4 digit verify code!
                 </span>
@@ -878,6 +896,12 @@ const BookingStep4 = ({ onNext }) => {
                   <span className=" mt-1 fs-11 d-block text-muted">
                     We have sent you a 4 digit code at{" "}
                     {obfuscateEmail(formFields.email)}
+                  </span>
+                )}
+                 {/* Show timer countdown when OTP is sent */}
+                 {timer && (
+                  <span className="resetOtpCount">
+                   Remaining Time : <span style={{color:"red"}}>{countdown}s</span>
                   </span>
                 )}
               </div>
