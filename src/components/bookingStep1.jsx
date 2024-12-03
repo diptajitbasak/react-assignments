@@ -42,7 +42,6 @@ export const LanguageList = [
 
 const BookingStep1 = ({ onNext }) => {
   const [bookingFor, setBookingFor] = useState("mainSigner");
-  console.log("111>>>");
   const [formFields, setFormFields] = useState([
     {
       signer: "",
@@ -96,9 +95,8 @@ const BookingStep1 = ({ onNext }) => {
       isBookingMainSigner = false;
     }
 
-    // Loop through formFields to extract firstName and lastName
     const updatedBorrowers = formFields.map((field) => {
-      // Split the signer name into first name and last name
+      
       let nameParts = field?.signer?.split(" ");
       let firstName = "",
         lastName = "";
@@ -122,16 +120,14 @@ const BookingStep1 = ({ onNext }) => {
       };
     });
 
-    // Now, construct the booking data with updated borrowers
     const bookingData = {
       step1: {
         isBookingMainSigner: isBookingMainSigner,
         borrower: updatedBorrowers,
       },
-      step2: { ...storedBookingData.step2 }, // Keep step2 unchanged
-      step3: { ...storedBookingData.step3 }, // Keep step3 unchanged
-      step4: { ...storedBookingData.step4 }, // Keep step4 unchanged
-      // agentIds: [], // Assuming this is handled elsewhere in your code
+      step2: { ...storedBookingData.step2 }, 
+      step3: { ...storedBookingData.step3 }, 
+      step4: { ...storedBookingData.step4 }, 
     };
 
     dispatch(updateBooking(bookingData));
@@ -182,7 +178,7 @@ const BookingStep1 = ({ onNext }) => {
           phone: "",
           language: "",
           id: Date.now(),
-        }; // Unique ID added here
+        }; 
         setFormFields([...formFields, newField]);
         setErrors([...errors, { signer: "", email: "", phone: "" }]);
         setIsDirty([...isDirty, { signer: false, email: false, phone: "" }]);
@@ -250,8 +246,7 @@ const BookingStep1 = ({ onNext }) => {
       if (isValid) {
         onNext("2", "2");
         handleUpdateBooking(formFields);
-        // const agentID = "63997eef2475d90ca5205bd2"
-        // const response = getStandardFees(agentID)
+       
       }
     } catch {}
   };

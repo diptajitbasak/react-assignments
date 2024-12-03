@@ -184,11 +184,9 @@ const BookingStep3 = ({ onNext }) => {
   const [placeSuggestions, setPlaceSuggestions] = useState([]);
 
   const [errors, setErrors] = useState({});
- 
 
   console.log("formFields>>>", formFields);
   console.log("errors>>>", errors);
-
 
   const storedBookingData = useSelector((state) => state.bookingDataReducer);
 
@@ -203,14 +201,11 @@ const BookingStep3 = ({ onNext }) => {
         locationSearched: storedBookingData?.step3?.locationSearched || "",
       };
       setFormFields(updatedFormFields);
-      // setCheckboxSelections(updatedFormFields.checkboxSelections); // Ensure selections are set
     }
   }, []);
 
   useEffect(() => {
-    // if (formFields?.closingAddress) {
     handleUpdateBooking(formFields);
-    // }
   }, [formFields]);
 
   const dispatch = useDispatch();
@@ -239,10 +234,9 @@ const BookingStep3 = ({ onNext }) => {
 
   const handlePreviousAndNext = async (buttonName) => {
     handleUpdateBooking(formFields);
-    // await markAllDirty()
     const isFormValid = await validateForm(formFields);
     // console.log("isFormValid" , isFormValid);
-    
+
     if (isFormValid) {
       if (buttonName === "next") {
         onNext("4", "4");
@@ -254,15 +248,12 @@ const BookingStep3 = ({ onNext }) => {
   };
 
   const handleChangeTime = (date) => {
-  const updatedFormFields = {...formFields}
-  updatedFormFields["time"] = date
+    const updatedFormFields = { ...formFields };
+    updatedFormFields["time"] = date;
 
     setFormFields(updatedFormFields);
-    validateForm(updatedFormFields)
+    validateForm(updatedFormFields);
   };
-
-    
-  
 
   const handleLocationSearch = async (event, name) => {
     console.log("name>>>", name);
@@ -284,10 +275,7 @@ const BookingStep3 = ({ onNext }) => {
     } catch (err) {
       console.log("err", err);
     }
-
   };
-
- 
 
   const validateForm = (updatedFormFields) => {
     const updatedErrors = { ...errors };
@@ -367,9 +355,9 @@ const BookingStep3 = ({ onNext }) => {
         };
         updatedFormFields["locationSearched"] = locationSearched?.description;
         setFormFields(updatedFormFields);
-        // handleUpdateBooking(updatedFormFields)
+        handleUpdateBooking(updatedFormFields)
         setTimeout(() => {
-          setPlaceSuggestions([]); // This will close the dropdown after a brief delay
+          setPlaceSuggestions([]); 
         }, 100);
       } else {
         Toastify({
@@ -379,13 +367,12 @@ const BookingStep3 = ({ onNext }) => {
           close: true,
           gravity: "top",
           position: "center",
-          backgroundColor: "#1D9E53", // Parrot Green color
+          backgroundColor: "#1D9E53", 
           stopOnFocus: true,
           closeMethod: "fade",
           className: "custom-toast",
         }).showToast();
 
-        // alert("Ivalid Address Selected!");
       }
     } catch (err) {
       console.log("err", err);
@@ -393,60 +380,49 @@ const BookingStep3 = ({ onNext }) => {
   };
 
   const handleChange = (event) => {
-    let value = "";
-    let name = event.target ? event.target.name : "appointmentDate"; // Default name for handling the date
+    // console.log("event>>>", event);
 
-    // Handle ReactDatetime for date and time
+    let value = "";
+    let name = event.target ? event.target.name : "appointmentDate"; 
+    // console.log("name>>>", name);
+
+
     if (event && event._isValid) {
       name = event.target ? event.target.name : "appointmentDate";
-      value = event; // Format the date to 'DD/MM/YYYY'
+      value = event; 
     } else if (event && event.target) {
       name = event.target.name;
-      value = event.target.value; // Regular input value
+      value = event.target.value; 
     }
 
-    // Update the formFields state
     const updatedFormFields = { ...formFields };
     updatedFormFields[name] = value;
     setFormFields(updatedFormFields);
-
-    // Optionally validate form after updating
     validateForm(updatedFormFields);
   };
 
   const isValidDate = (current) => {
-    // Allow today's date, but prevent selecting past dates
-    const today = new Date().setHours(0, 0, 0, 0); // Set to midnight to compare only dates
-    return current.isSameOrAfter(today); // Allow today and any future date
+    const today = new Date().setHours(0, 0, 0, 0);
+    
+    return current.isSameOrAfter(today); 
   };
 
-  // const checkTime = (givenTime) => {
-  //   const now = moment();
-  //   if (moment(givenTime).isBefore(now)) {
-  //     return false;
-  //   } else if (moment(givenTime).isSameOrAfter(now, "minute")) {
-  //     return true;
-  //   }
-  // };
-
   const checkTime = (givenTime) => {
-    const selectedDate = moment(formFields.appointmentDate); // Get the selected appointment date
+    const selectedDate = moment(formFields.appointmentDate); 
     const fullDateTime = selectedDate.set({
       hour: moment(givenTime).hour(),
       minute: moment(givenTime).minute(),
     }); // Combine the selected date with the selected time
-  
-    const now = moment();
-    
-    // Compare the combined selected date and time with the current date and time
-    if (fullDateTime.isBefore(now)) {
-      return false; // If the selected time is before the current time, return false
-    } else if (fullDateTime.isSameOrAfter(now, "minute")) {
-      return true; // If the selected time is now or later, return true
-    }
-  }
-  
 
+    const now = moment();
+    // console.log("fullDateTime>>", fullDateTime);
+    
+    if (fullDateTime.isBefore(now)) {
+      return false; 
+    } else if (fullDateTime.isSameOrAfter(now, "minute")) {
+      return true; 
+    }
+  };
 
   return (
     <>
@@ -484,8 +460,9 @@ const BookingStep3 = ({ onNext }) => {
                       );
                     })}
                 </ListGroup>
-                {errors?.locationSearched && <p style={{ color: "red" }}>{errors?.locationSearched}</p>}
-
+                {errors?.locationSearched && (
+                  <p style={{ color: "red" }}>{errors?.locationSearched}</p>
+                )}
               </FormGroup>
             </Col>
             <Col md={6}>
@@ -504,7 +481,6 @@ const BookingStep3 = ({ onNext }) => {
                     isValidDate={isValidDate} // Prevent past dates, allow today
                     dateFormat={true}
                     onChange={handleChange}
-
                     closeOnSelect={true}
                     timeFormat={false}
                   />
@@ -555,16 +531,14 @@ const BookingStep3 = ({ onNext }) => {
                   timeConstraints={{
                     minutes: { min: 0, max: 59, step: 15 },
                   }}
-                  isValidDate={(current) => {
-                    // Prevent past times (make sure the selected time is after the current time)
-                    const now = new Date();
-                    const selectedTime = current.toDate();
-                    return selectedTime > now;
-                  }}
+                  // isValidDate={(current) => {
+                  //   // Prevent past times (make sure the selected time is after the current time)
+                  //   const now = new Date();
+                  //   const selectedTime = current.toDate();
+                  //   return selectedTime > now;
+                  // }}
                 />
-                {errors?.time && (
-                  <p style={{ color: "red" }}>{errors?.time}</p>
-                )}
+                {errors?.time && <p style={{ color: "red" }}>{errors?.time}</p>}
               </FormGroup>
             </Col>
           </Row>

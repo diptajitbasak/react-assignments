@@ -28,7 +28,6 @@ const BookingStep2 = ({ onNext }) => {
   const [checkboxSelections, setCheckboxSelections] = useState({});
   const [standardFeeDetails, setStandardFeeDetails] = useState();
   const [activeTab, setActiveTab] = useState("1");
-  // Only calculate unique categories once standardFeeDetails is available
   const uniqueCategories = standardFeeDetails?.agent?.standardFees
     ? [
         ...new Set(
@@ -45,19 +44,18 @@ const BookingStep2 = ({ onNext }) => {
 
   useEffect(() => {
     if (storedBookingData && storedBookingData.step2) {
-      // Assuming storedBookingData has step2 with data
       const updatedFormFields = {
-        witnessCount: storedBookingData.step2.witnessCount || "", // Make sure to handle default values
+        witnessCount: storedBookingData.step2.witnessCount || "", 
         loanTypeOther: storedBookingData.step2.loanTypeOther || "",
         loanCategories: storedBookingData.step2.loanCategories || [],
         loanType: storedBookingData.step2.loanType || "",
-        signingType: storedBookingData.step2.signingType || "Mobile", // Default value if undefined
-        checkboxSelections: storedBookingData.step2.checkboxSelections || {}, // Default to an empty object if undefined
+        signingType: storedBookingData.step2.signingType || "Mobile", 
+        checkboxSelections: storedBookingData.step2.checkboxSelections || {}, 
       };
       setFormFields(updatedFormFields);
-      setCheckboxSelections(updatedFormFields.checkboxSelections); // Ensure selections are set
+      setCheckboxSelections(updatedFormFields.checkboxSelections); 
     }
-  }, [storedBookingData]); // Ensure it runs when storedBookingData is available
+  }, [storedBookingData]); 
 
   const dispatch = useDispatch();
 
@@ -70,7 +68,6 @@ const BookingStep2 = ({ onNext }) => {
     
     let updatedBookingData = { ...storedBookingData };
 
-    // Calculate productValue dynamically based on selected product categories
     let totalProductValue = 0;
     standardFeeDetails?.agent?.standardFees?.forEach((category) => {
       if (
@@ -83,7 +80,6 @@ const BookingStep2 = ({ onNext }) => {
       }
     });
 
-    // Update the step2 with the form fields and calculated product value
     updatedBookingData.step2 = {
       witnessCount: formFields?.witnessCount || 0,
       loanTypeOther: formFields?.loanTypeOther,
@@ -126,7 +122,6 @@ const BookingStep2 = ({ onNext }) => {
 
   useEffect(() => {
     if (storedBookingData && storedBookingData.step2) {
-      // Assuming storedBookingData has checkboxSelections in step2
       setCheckboxSelections(storedBookingData.step2.checkboxSelections || {});
     }
   }, [storedBookingData]); // This will make sure checkboxSelections is updated when storedBookingData is available
@@ -138,7 +133,7 @@ const BookingStep2 = ({ onNext }) => {
     );
     let isvalid = true;
     if (isSelectionsEmpty) {
-      setErrors("*Required"); // Show error if any array inside checkboxSelections is empty
+      setErrors("*Required"); 
       isvalid = false;
       return isvalid;
     } else {
@@ -162,27 +157,7 @@ const BookingStep2 = ({ onNext }) => {
     }
   };
 
-  // const handleCheckboxChange = (category, productType, isChecked) => {
-  //   setCheckboxSelections((prevSelections) => {
-  //     const newSelections = { ...prevSelections };
-
-  //     // Update the selection based on whether the checkbox was checked or unchecked
-  //     if (!newSelections[category]) {
-  //       newSelections[category] = [];
-  //     }
-
-  //     if (isChecked) {
-  //       newSelections[category].push(productType); // Add productType to the category
-  //     } else {
-  //       newSelections[category] = newSelections[category].filter(
-  //         (type) => type !== productType // Remove productType from the category
-  //       );
-  //     }
-
-  //     return newSelections;
-  //   });
-  // };
-
+ 
   const handleCheckboxChange = (category, productType, isChecked) => {
     setCheckboxSelections((prevSelections) => {
       // Deep copy the prevSelections to avoid mutation
@@ -273,55 +248,7 @@ const BookingStep2 = ({ onNext }) => {
                 })}
               </Nav>
 
-              <TabContent activeTab={activeTab}>
-                {/* <TabPane tabId = {activeTab}>
-                  <div className="productList">
-                  {standardFeeDetails?.agent?.standardFees.map((category, index) => {
-                    return category = uniqueCategories[0]
-                    <ul>
-                      <li>
-                        <div className="formLabel">
-                          <Input type="checkbox" name="signing" />
-                          {productType}{productValue}
-                        </div>
-                      </li>                     
-                    </ul>
-                    })}
-                  </div>
-                </TabPane> */}
-
-                {/* <TabPane tabId={activeTab}>
-                  <div className="productList">
-                    {standardFeeDetails?.agent?.standardFees
-                      .filter((category, index, self) => {
-                        // Only include the category if it's the first occurrence of that productType within the same category
-                        return (
-                          category.productCategory ===
-                            uniqueCategories[activeTab - 1] &&
-                          self.findIndex(
-                            (item) => item.productType === category.productType
-                          ) === index
-                        );
-                      })
-                      .map((category, index) => (
-                        <ul key={category._id}>
-                          {category.productValue > 0 ? (
-                            <li>
-                              <div className="formLabel">
-                                <Input type="checkbox" name="signing" />
-                                {category.productType
-                                  .replace(/([A-Z])/g, " $1") // Add a space before each uppercase letter
-                                  .trim()}{" "}
-                                (${category.productValue})
-                              </div>
-                            </li>
-                          ) : (
-                            ""
-                          )}
-                        </ul>
-                      ))}
-                  </div>
-                </TabPane> */}
+              <TabContent activeTab={activeTab}>              
 
                 <TabPane tabId={activeTab}>
                   <div style={{display:"flex",  flexWrap:"wrap"}} className="productList">
