@@ -27,6 +27,7 @@ const BookingStep2 = ({ goPrevious, goNext }) => {
   const [stateData, setStateData] = useState([]);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [witness, setWithness] = useState(0);
 
   const allStateData = useSelector((state) => {
     return state?.bookingDataReducer;
@@ -63,6 +64,7 @@ const BookingStep2 = ({ goPrevious, goNext }) => {
       const getStandardFeesApiRes = await getStandardFees(
         "63997eef2475d90ca5205bd2"
       );
+      setWithness(getStandardFeesApiRes?.agent?.WitnessFee);
       const rawData = getStandardFeesApiRes?.agent?.standardFees || [];
       const uniqueData = processApiData(rawData);
       console.log(getStandardFeesApiRes);
@@ -127,7 +129,7 @@ const BookingStep2 = ({ goPrevious, goNext }) => {
   };
 
   const handleWithnessNumber = (value) => {
-    if (value !== "") {
+    if (value && Number(value) > 0) {
       setWitnessNumber(Number(value));
     } else {
       setWitnessNumber(0);
@@ -158,7 +160,6 @@ const BookingStep2 = ({ goPrevious, goNext }) => {
 
   console.log(stateData);
   const handleButtonNext = () => {
-    debugger;
     console.log(stateData.length);
     if (!productTypeValidation()) {
       setError("*Required");
@@ -166,6 +167,21 @@ const BookingStep2 = ({ goPrevious, goNext }) => {
       return;
     }
     setError(null);
+    updateStateNextAndPrev();
+    goNext();
+  };
+  const handleButtonPrev = () => {
+    if (!productTypeValidation()) {
+      setError("*Required");
+      console.log(error);
+      return;
+    }
+    setError(null);
+    updateStateNextAndPrev();
+    goPrevious();
+  };
+
+  const updateStateNextAndPrev = () => {
     const step2 = {
       signingType: signingType,
       loanType: [],
@@ -184,7 +200,7 @@ const BookingStep2 = ({ goPrevious, goNext }) => {
     });
     console.log({ totalProductValue, witnessNumber });
     step2.agentFee = Number(
-      (totalProductValue + 67 * witnessNumber).toFixed(2)
+      (totalProductValue + witness * witnessNumber).toFixed(2)
     );
     step2.loanCategories = [...productCategorySet];
     const step3 = allStateData.step3 ? { ...allStateData.step3 } : null;
@@ -196,9 +212,7 @@ const BookingStep2 = ({ goPrevious, goNext }) => {
       step3.timeZone = "";
     }
     dispatch(updateBooking({ ...allStateData, step2, step3 }));
-    goNext();
   };
-
   const productTypeValidation = () => {
     if (stateData.length === 0) {
       return false;
@@ -305,10 +319,11 @@ const BookingStep2 = ({ goPrevious, goNext }) => {
           {error && <span style={{ color: "red" }}>{error}</span>}
 
           <div className="formGroup mt-4">
-            <Label>Witness Number ($67 per Witness)</Label>
+            <Label>Witness Number (${witness} per Witness)</Label>
             <Input
               placeholder="Enter"
               name="witnessNumber"
+              type="number"
               value={witnessNumber}
               onChange={(e) => handleWithnessNumber(e.target.value)}
             />
@@ -316,7 +331,7 @@ const BookingStep2 = ({ goPrevious, goNext }) => {
         </CardBody>
       </Card>
       <div className="tabAction">
-        <Button color="primary" outline onClick={goPrevious}>
+        <Button color="primary" outline onClick={handleButtonPrev}>
           <SvgIcons type={"logArrowLeft"} />
           Previous
         </Button>

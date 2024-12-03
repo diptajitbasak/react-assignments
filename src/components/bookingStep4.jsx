@@ -116,6 +116,7 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
       }, 1000);
     } else if (timer === 0) {
       setShowTimer(false);
+      clearInterval(timerId);
     }
 
     return () => clearInterval(timerId);
@@ -130,6 +131,16 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
     try {
       const response = await sendOtpEmailForBooking(payload);
       if (response) {
+        toast.success("OTP sent succesfully", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+
+          theme: "light",
+        });
         setTimer(59);
         setShowTimer(true);
       }
@@ -150,7 +161,10 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
     };
     try {
       const response = await verificationForBooking(payload);
-      setIsVerified(true);
+      if (response) {
+        setShowTimer(false);
+        setIsVerified(true);
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -423,21 +437,21 @@ const BookingStep4 = ({ goPrevious, goNext }) => {
                   <span>Agent Fee:</span>
                   <span>
                     <FontAwesomeIcon icon={faDollarSign} />
-                    {reduxStep2Data?.agentFee}
+                    {reduxStep2Data?.agentFee || 0}
                   </span>
                 </li>
                 <li>
                   <span>Processing Fee:</span>
                   <span>
                     <FontAwesomeIcon icon={faDollarSign} />
-                    {processingFee?.toFixed(2)}
+                    {Number(processingFee?.toFixed(2)) || 0}
                   </span>
                 </li>
                 <li>
                   <span>Total:</span>
                   <span>
                     <FontAwesomeIcon icon={faDollarSign} />
-                    {totalAmount?.toFixed(2)}
+                    {Number(totalAmount?.toFixed(2)) || 0}
                   </span>
                 </li>
               </ul>

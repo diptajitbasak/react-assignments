@@ -19,9 +19,6 @@ function Successfull({ isOpen, toggle }) {
 
   return (
     <div>
-      <Button color="danger" onClick={toggle}>
-        Click Me
-      </Button>
       <Modal isOpen={isOpen} toggle={toggle}>
         <ModalBody>
           <div style={{ textAlign: "center" }}>

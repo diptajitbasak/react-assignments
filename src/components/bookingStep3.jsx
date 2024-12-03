@@ -63,16 +63,6 @@ const BookingStep3 = ({ goNext, goPrevious }) => {
     return currentDate.isSameOrAfter(today);
   };
 
-  const isPastTimes = (currentDate) => {
-    const now = moment();
-    const today = now.clone().startOf("day");
-    if (currentDate.isSame(today, "day")) {
-      return currentDate.isSameOrAfter(now);
-    }
-
-    return true;
-  };
-
   useEffect(() => {
     console.log(reduxStep3Data);
     if (reduxStep3Data) {
@@ -122,6 +112,7 @@ const BookingStep3 = ({ goNext, goPrevious }) => {
   }, [reduxStep2Data]);
 
   const handleChange = (name, value) => {
+    debugger;
     console.log(name, value);
     setFormFields((prev) => ({
       ...prev,
@@ -135,7 +126,7 @@ const BookingStep3 = ({ goNext, goPrevious }) => {
   };
 
   const googlePlaceSearch = (searchValue) => {
-    debugger;
+    // debugger;
     setSelectPlace(searchValue);
     return new Promise((resolve, reject) => {
       if (searchValue) {
@@ -283,7 +274,7 @@ const BookingStep3 = ({ goNext, goPrevious }) => {
   const validateField = (name, value) => {
     let newError = { ...error };
     console.log(value);
-    if (value === "") {
+    if (!value) {
       newError[name] = "*Required";
     } else {
       newError[name] = "";
@@ -291,9 +282,9 @@ const BookingStep3 = ({ goNext, goPrevious }) => {
 
     setError(newError);
   };
-  useEffect(() => {
-    validateForm();
-  }, [formFields]);
+  // useEffect(() => {
+  //   validateForm();
+  // }, [formFields]);
   const validateForm = () => {
     let newError = {};
     let isValid = true;
@@ -341,26 +332,37 @@ const BookingStep3 = ({ goNext, goPrevious }) => {
   console.log(error);
 
   const handleNext = () => {
-    console.log(selectPlace);
+    // console.log(selectPlace);
     if (validateForm()) {
-      const step3 = {
-        timeZone: formFields.timeZone,
-        appointmentDate:
-          step3DateFormate(formFields.selectedDate) +
-          " " +
-          formatTime(formFields.selectedTime),
-        closingAddress: {
-          line1: selectPlaceObj?.address,
-          city: selectPlaceObj?.city,
-          state: selectPlaceObj?.state,
-          zip: selectPlaceObj?.postal,
-          county: selectPlaceObj?.country,
-        },
-      };
-      dispatch(updateBooking({ ...allStateData, step3 }));
+      updateStateOnPrevNext();
       goNext();
     }
   };
+  const handlePrev = () => {
+    if (validateForm()) {
+      updateStateOnPrevNext();
+      goPrevious();
+    }
+  };
+
+  const updateStateOnPrevNext = () => {
+    const step3 = {
+      timeZone: formFields.timeZone,
+      appointmentDate:
+        step3DateFormate(formFields.selectedDate) +
+        " " +
+        formatTime(formFields.selectedTime),
+      closingAddress: {
+        line1: selectPlaceObj?.address,
+        city: selectPlaceObj?.city,
+        state: selectPlaceObj?.state,
+        zip: selectPlaceObj?.postal,
+        county: selectPlaceObj?.country,
+      },
+    };
+    dispatch(updateBooking({ ...allStateData, step3 }));
+  };
+
   return (
     <>
       <Card className="stepCard">
@@ -380,6 +382,7 @@ const BookingStep3 = ({ goNext, goPrevious }) => {
                     name="location"
                     ref={inputRef1}
                     value={selectPlace}
+                    onBlur={() => validateField("location", selectPlace)}
                     onChange={(e) => googlePlaceSearch(e.target.value)}
                   />
                 </InputGroup>
@@ -481,7 +484,7 @@ const BookingStep3 = ({ goNext, goPrevious }) => {
         </CardBody>
       </Card>
       <div className="tabAction">
-        <Button color="primary" outline onClick={goPrevious}>
+        <Button color="primary" outline onClick={handlePrev}>
           <SvgIcons type={"logArrowLeft"} />
           Previous
         </Button>
