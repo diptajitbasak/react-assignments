@@ -296,8 +296,13 @@ const BookingStep3 = ({ onNext }) => {
             if (updatedFormFields?.timeZone) {
               delete updatedErrors?.timeZone;
             } else {
-              updatedErrors.timeZone = "*Required";
-              isFormValid = false;
+              if(storedBookingData?.step2?.signingType === "Mobile"){
+                delete updatedErrors?.timeZone;
+              } else {
+                updatedErrors.timeZone = "*Required";
+                isFormValid = false;
+              }
+              
             }
             setErrors(updatedErrors);
             break;
