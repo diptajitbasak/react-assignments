@@ -266,12 +266,10 @@ const BookingStep3 = ({ onNext }) => {
     const searchValue = event.target.value;
 
     try {
-      if (searchValue.length > 2) {
         // console.log("searchValue>>", searchValue);
         const googleSearch = await googlePlaceSearch(searchValue);
         // console.log("googleSearch>>", googleSearch);
         setPlaceSuggestions(googleSearch);
-      }
     } catch (err) {
       console.log("err", err);
     }
